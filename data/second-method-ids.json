@@ -1,0 +1,39 @@
+{
+    "QLabel": [
+        "firstWarningLabel",
+        "secondWarningLabel",
+
+        "inputLabel",
+        "outputLabel",
+
+        "routesLabel"
+    ],
+
+    "QTextEdit": [
+        "inputTextEdit",
+        "outputTextEdit"
+    ],
+
+    "QComboBox": [
+        "arraySizeComboBox"
+    ],
+
+    "QPushButton": [
+
+        "runButton",
+        "resetButton",
+
+        "backButton"
+
+    ],
+
+    "QGroupBox": [
+        "operationRadioButtonGroup"
+    ],
+
+    "QRadioButton": [
+        "encryptRadioButton",
+        "decryptRadioButton"
+    ]
+
+}
