@@ -1,0 +1,10 @@
+{
+    "QLabel": [
+        "mainLabel"
+    ],
+
+    "QPushButton": [
+        "mainButton",
+        "exitButton"
+    ]
+}
