@@ -4,7 +4,9 @@
     ],
 
     "QPushButton": [
-        "mainButton",
+        "firstMethodButton",
+        "secondMethodButton",
         "exitButton"
     ]
+
 }
