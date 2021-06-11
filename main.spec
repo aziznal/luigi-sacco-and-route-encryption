@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(['main.py'],
-             pathex=['F:\\Programming\\Python Qt GUI Framework'],
+             pathex=['D:\\College\\Year 3\\2nd_Semester\\Kriptografi - CE436\\finals\\application'],
              binaries=[],
              datas=[('data', 'data')],
              hiddenimports=[],
