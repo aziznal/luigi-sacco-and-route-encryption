@@ -22,8 +22,21 @@ def create_main_window():
     return gui
 
 
-def create_first_method_window():
-    pass
+def create_first_method_window(main_window: Gui):
+    widget_ids = "data/first-method-ids.json"
+    gui_file_path = "data/first-method.ui"
+
+    gui = Gui(widget_ids, gui_file_path)
+
+    gui.hide()
+
+    def show_main_window():
+        gui.hide()
+        main_window.show()
+
+    gui.add_event_listener("backButton", show_main_window)
+
+    return gui
 
 
 def create_second_method_window():
@@ -35,11 +48,16 @@ if __name__ == '__main__':
     app = QApplication([])
 
     main_window = create_main_window()
-
-    first_method_window = create_first_method_window()
+    first_method_window = create_first_method_window(main_window)
     second_method_window = create_second_method_window()
 
-    main_window.add_event_listener("firstMethodButton", lambda: print("Luigi Socco"))
+
+    def show_first_method():
+        main_window.hide()
+        first_method_window.show()
+
+
+    main_window.add_event_listener("firstMethodButton", show_first_method)
     main_window.add_event_listener("secondMethodButton", lambda: print("Route Encryption"))
 
     app.exec_()

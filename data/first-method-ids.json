@@ -1,0 +1,40 @@
+{
+    "QLabel": [
+        "firstWarningLabel",
+        "secondWarningLabel",
+
+        "keyLabel",
+        "inputLabel",
+        "outputLabel"
+    ],
+
+    "QTextEdit": [
+        "keyTextEdit",
+        "inputTextEdit",
+        "outputTextEdit"
+    ],
+
+    "QPushButton": [
+        "informationButton",
+
+        "runButton",
+        "resetButton",
+
+        "backButton"
+
+    ],
+
+    "QGroupBox": [
+        "languageRadioButtonGroup",
+        "operationRadioButtonGroup"
+    ],
+
+    "QRadioButton": [
+        "englishRadioButton",
+        "turkishRadioButton",
+
+        "encryptRadioButton",
+        "decryptRadioButton"
+    ]
+
+}
