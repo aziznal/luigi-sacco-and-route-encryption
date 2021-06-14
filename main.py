@@ -83,8 +83,6 @@ def create_second_method_window(main_window):
 
 if __name__ == '__main__':
 
-    # TODO: move newly created (or opened) windows to center of screen
-    # TODO: make sure newly opened windows are the topmost windows when they open
     app = QApplication([])
 
     screen_geometry = QApplication.desktop().screenGeometry()
