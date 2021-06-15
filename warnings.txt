@@ -1,0 +1,5 @@
+Luigi Socco:
+
+    - You may include repeating characters in your key.
+    - Enter your message in any form you want. Output will always be capital letters.
+    - Do not use any symbols (such as punctuation) or numerical digits in your message.
