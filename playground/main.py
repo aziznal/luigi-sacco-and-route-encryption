@@ -56,7 +56,7 @@ def get_transposed(matrix):
     return list(map(list, zip(*matrix)))
 
 
-def luigi_sacco_encrypt(key, plain_text, lang="TR"):
+def luigi_sacco_encrypt(key, plain_text, lang="TR", verbose=False):
 
     # Remove all spaces and symbols and capitalize text
     plain_text = plain_text.replace(' ', '')
@@ -66,22 +66,38 @@ def luigi_sacco_encrypt(key, plain_text, lang="TR"):
 
     # Get column splits from key
     splits = order_key(key, lang)
+    key_length = len(splits)
+
+    if verbose:
+        print("\nKey Length: ")
+        print(key_length)
+
+    # NOTES
+    #   I could probably get away with not splitting a very message into multiple
+    #   bits if I can get gud with matrix operations
+    #
+    #   A Row will NEVER be longer than the length of the key by definition of this encryption method
+    #
+    #   Columns may be longer than the key length depending on length of plain text 
 
     initial_matrix = []
 
-    for split in splits:
-        message_row = []
-        while split != 0:
-            try:
-                message_row.append(plain_text[0])
-                plain_text = plain_text[1:]
-                split -= 1
+    while len(plain_text) > 0:
 
-            # TODO: check how sturdy this actually is
-            except IndexError:
-                break
+        for split in splits:
+            message_row = []
+            while split != 0:
+                try:
+                    message_row.append(plain_text[0])
+                    plain_text = plain_text[1:]
+                    split -= 1
 
-        initial_matrix.append(message_row)
+                # TODO: check how sturdy this actually is
+                except IndexError:
+                    break
+                
+            filler = ['_' for i in range(key_length - len(message_row))]
+            initial_matrix.append(message_row + filler)
 
     # Must fill up 'empty spaces' in message matrix to be able to get the final form
     max_row_length = len(max(initial_matrix, key=len))
@@ -90,10 +106,31 @@ def luigi_sacco_encrypt(key, plain_text, lang="TR"):
         while len(row) < max_row_length:
             row.append('_')
 
+    if verbose:
+        print("\nInitial Matrix")
+        [print(row) for row in initial_matrix]
+
     # Transposing to make extracting final message easier
     transposed_matrix = get_transposed(initial_matrix)
 
-    final_message_matrix = [transposed_matrix[row-1] for row in splits]
+    if verbose:
+        print("\nTransposed Matrix")
+        [print(row) for row in transposed_matrix]
+
+    # Pick the words of the message in the order provided by the splits.
+    
+    final_message_matrix = []
+
+    for row_index in splits:
+        if row_index <= len(transposed_matrix):
+            final_message_matrix.append(transposed_matrix[row_index - 1])
+
+    # final_message_matrix = [transposed_matrix[row-1] for row in splits if row <= len(transposed_matrix)]
+
+    if verbose:
+        print(splits)
+        print("\nFinal Message Matrix")
+        [print(row) for row in final_message_matrix]
     
     # Removing underscores and joining message together
     final_message = ' '.join([''.join(row).replace('_', '') for row in final_message_matrix])
@@ -143,7 +180,7 @@ def push_down(matrix, row, split):
             pass
         
 
-def super_sophisticated_matrix_transformation_algorithm(matrix, splits):
+def super_sophisticated_matrix_transformation_algorithm(matrix, splits, verbose):
 
     # Starting from first row, make sure there are only as many chars in it as the split
 
@@ -155,7 +192,6 @@ def super_sophisticated_matrix_transformation_algorithm(matrix, splits):
     # Copying matrix to avoid changing the passed in matrix
     matrix = [ [element for element in row] for row in matrix ]
 
-    print("\n\n")
     # NOTE: if we had a long message, we'd have more rows than there are splits.
     # and this code would fail. Solution is to divide message into 6 row matrices whenever
     # is longer than 6 rows, and apply this algorithm on each of those matrices.
@@ -167,16 +203,19 @@ def super_sophisticated_matrix_transformation_algorithm(matrix, splits):
             if len(row) != split:
                 push_down(matrix, i, split)
 
-    print("\n\n")
-    [print(row) for row in matrix]
+    if verbose:
+        print("\n\n")
+        [print(row) for row in matrix]
 
     return matrix
 
 
-def luigi_sacco_decrypt(key, encrypted_text, lang="TR"):
+def luigi_sacco_decrypt(key, encrypted_text, lang="TR", verbose=False):
     
     splits = order_key(key, lang)
-    print(splits)
+    
+    if verbose:
+        print(splits)
 
     encrypted_text = encrypted_text.split(' ')
 
@@ -186,65 +225,79 @@ def luigi_sacco_decrypt(key, encrypted_text, lang="TR"):
         # Split word in character list and assign to relevant column
         transposed_matrix[split - 1] = [char for char in word]
 
-    # [print(row) for row in transposed_matrix]
-
-    max_row_length = len(max(transposed_matrix, key=len))
 
     # Filling in empty spaces with '_' to transpose matrix (because function has
     # trouble with 'jagged' matrices)
+    max_row_length = len(max(transposed_matrix, key=len))
 
     for row in transposed_matrix:
         while len(row) < max_row_length:
             row.append('_')
 
-    # print("\n")
-    # [print(row) for row in transposed_matrix]
+    if verbose:
+        print("\nTransposed Matrix")
+        [print(row) for row in transposed_matrix]
 
     initial_matrix = get_transposed(transposed_matrix)
 
-    print("\n")
-    [print(row) for row in initial_matrix]
+    if verbose:
+        print("\n")
+        [print(row) for row in initial_matrix]
 
     # Clearing the '_' to make next step easier
     # initial_matrix = [ [element for element in row if element != '_'] for row in initial_matrix]
 
-    final_matrix = super_sophisticated_matrix_transformation_algorithm(initial_matrix, splits)
+    final_matrix = super_sophisticated_matrix_transformation_algorithm(initial_matrix, splits, verbose)
 
     return ''.join([''.join(row).replace('_', '') for row in final_matrix])
 
 
 
-def test_program(key, plain_text):
+def test_program(key, plain_text, lang="TR"):
 
-    encrypted_message = luigi_sacco_encrypt(key, plain_text, lang="TR")
-    decrypted_message = luigi_sacco_decrypt(key, encrypted_message, lang="TR")
+    encrypted_message = luigi_sacco_encrypt(key, plain_text, lang=lang, verbose=True)
+    decrypted_message = luigi_sacco_decrypt(key, encrypted_message, lang=lang, verbose=False)
 
 
     print(f"\n\n\nOriginal Message:")
     print("\n\t" + plain_text)
     
     print("\n\nEncrypted Message: ")
-    print("\n\t" + encrypted_message)
+    print("\n\t" + encrypted_message, end='')
+    if len(encrypted_message.replace(' ' ,'')) == len(plain_text.replace(' ', '')):
+        print(" (Lengths match)")
+    else:
+        print(" (Lengths DON'T match)")
 
     print("\n\nDecrypted Message: ")
     print("\n\t" + decrypted_message)
+
+    print("\nHas been decoded correctly?")
+    if decrypted_message.replace(' ', '') == plain_text.replace(' ', ''):
+        print("\n\tYes!")
+
+    else:
+        print("\n\tNope :'(")
 
 
 
 if __name__ == '__main__':
 
     
-    # FIXME: if given text is too long, then not all of it is getting encrypted.
+    # FIXED: if given text is too long, then not all of it is getting encrypted.
     # FIXME: if key is too long, some weird stuff is happening
     # FIXME: having repeated letters in a key ruins the decryption process
     # TODO: create a big test for encryption and decryption
 
-    key = "TERAZİ"
-    plain_text = "ADALET MÜLKÜN TEMELİDİR"
+    # key = "TERAZİ"
+    # plain_text = "ADALET MÜLKÜN TEMELİDİR"
 
 
     # key = "CONVENIENCE"
     # plain_text = "HERE IS A SECRET MESSAGE ENCIPHERED BY TRANSPOSITION"
+
+    key = "SPANISHINQUISITION"
+    plain_text = "NO ONE EXPECTS THE SPANISH INQUISITION"
 
 
     # key = "AZİZNALISMYNAME"
@@ -252,4 +305,5 @@ if __name__ == '__main__':
     # plain_text = "BUGÜN ÇOK İYİ BİR GÜN OLACAK"
 
 
-    test_program(key, plain_text)
+    # test_program(key, plain_text, lang="EN")
+    test_program(key, plain_text, lang="TR")
