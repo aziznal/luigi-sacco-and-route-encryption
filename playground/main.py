@@ -58,6 +58,8 @@ def get_transposed(matrix):
 
 def luigi_sacco_encrypt(key, plain_text, lang="TR", verbose=False):
 
+    key = key.upper()
+
     # Remove all spaces and symbols and capitalize text
     plain_text = plain_text.replace(' ', '')
     plain_text = plain_text.upper()
@@ -223,6 +225,8 @@ def super_sophisticated_matrix_transformation_algorithm(matrix, splits, verbose)
 
 def luigi_sacco_decrypt(key, encrypted_text, lang="TR", verbose=False):
     
+    key = key.upper()
+
     splits = order_key(key, lang)
     
     if verbose:
@@ -264,31 +268,37 @@ def luigi_sacco_decrypt(key, encrypted_text, lang="TR", verbose=False):
 
 
 
-def test_program(key, plain_text, lang="TR"):
+def test_program(key, plain_text, lang="TR", verbose=False):
 
     encrypted_message = luigi_sacco_encrypt(key, plain_text, lang=lang, verbose=False)
     decrypted_message = luigi_sacco_decrypt(key, encrypted_message, lang=lang, verbose=False)
 
+    correctly_encrypted_and_decrypted = decrypted_message.replace(' ', '').upper() == plain_text.replace(' ', '').upper()
 
-    print(f"\n\n\nOriginal Message:")
-    print("\n\t" + plain_text)
-    
-    print("\n\nEncrypted Message: ")
-    print("\n\t" + encrypted_message, end='')
-    if len(encrypted_message.replace(' ' ,'')) == len(plain_text.replace(' ', '')):
-        print(" (Lengths match)")
-    else:
-        print(" (Lengths DON'T match)")
+    if verbose:
+        print(f"\n\n\nOriginal Message:")
+        print("\n\t" + plain_text)
+        
+        print("\n\nEncrypted Message: ")
+        print("\n\t" + encrypted_message, end='')
+        if len(encrypted_message.replace(' ' ,'')) == len(plain_text.replace(' ', '')):
+            print(" (Lengths match)")
+        else:
+            print(" (Lengths DON'T match)")
 
-    print("\n\nDecrypted Message: ")
-    print("\n\t" + decrypted_message)
+        print("\n\nDecrypted Message: ")
+        print("\n\t" + decrypted_message)
 
-    print("\n\nHas been decoded correctly?")
-    if decrypted_message.replace(' ', '') == plain_text.replace(' ', ''):
-        print("\n\tYes!")
+        print("\n\nHas been decoded correctly?")
+        if correctly_encrypted_and_decrypted:
+            print("\n\tYes!")
 
-    else:
-        print("\n\tNope :'(")
+        else:
+            print("\n\tNope :'(")
+            print(key)
+
+    return correctly_encrypted_and_decrypted
+
 
 
 
@@ -308,21 +318,34 @@ def execute_all_tests():
         "short"
     ]
 
+    total = 0
+    total_correct = 0
+
+    incorrect_combos = []
+
     for key in english_keys:
         for message in english_messages:
-            test_program(key, message, lang="EN")
+            total += 1
+            is_correct = test_program(key, message, lang="EN", verbose=False)
+
+            if is_correct:
+                total_correct += 1
+            
+            else:
+                incorrect_combos.append( [key, message] )
+
+    print(f"Got {total_correct} correct out of {total}")
+    print("\nFaulty Combinations:")
+    [print(row) for row in incorrect_combos]
 
 
 if __name__ == '__main__':
 
-    
-    # FIXED: if given text is too long, then not all of it is getting encrypted.
-    # FIXED: if key is too long, some weird stuff is happening
-    # FIXED: having repeated letters in a key ruins the decryption process
-    # TODO: create a big test for encryption and decryption
+    # TODO: add turkish tests
+    # FIXME: if key is too short, then the output of the decryption is wrong (it's correct upto a certain amount of characters tho)
 
-    key = "TERAZİ"
-    plain_text = "ADALET MÜLKÜN TEMELİDİR"
+    # key = "TERAZİ"
+    # plain_text = "ADALET MÜLKÜN TEMELİDİR"
 
 
     # key = "CONVENIENCE"
@@ -332,10 +355,12 @@ if __name__ == '__main__':
     # plain_text = "NO ONE EXPECTS THE SPANISH INQUISITION"
 
 
-    key = "AZİZNALISMYNAME"
+    # key = "AZİZNALISMYNAME"
     # key = "AZİZNAL"
-    plain_text = "BUGÜN ÇOK İYİ BİR GÜN OLACAK"
+    # plain_text = "BUGÜN ÇOK İYİ BİR GÜN OLACAK"
 
 
     # test_program(key, plain_text, lang="EN")
-    test_program(key, plain_text, lang="TR")
+    # test_program(key, plain_text, lang="TR")
+
+    execute_all_tests()
