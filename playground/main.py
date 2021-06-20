@@ -1,5 +1,8 @@
 import string
 
+from typing import Iterable, Literal, Union, List, Tuple
+
+
 TURKISH_ALPHABET = {letter: letter_index for letter_index,
                     letter in enumerate("ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ")}
 
@@ -7,7 +10,10 @@ ENGLISH_ALPHABET = {letter: letter_index for letter_index,
                     letter in enumerate(string.ascii_uppercase)}
 
 
-def custom_sort(iterable, lang):
+def custom_sort(iterable: Iterable, lang: Literal["EN", "TR"]) -> Iterable:
+    """
+    Alphabetically sorts given iterable according to given lang parameter
+    """
     if lang == "TR":
         return sorted(
             iterable,
@@ -24,7 +30,14 @@ def custom_sort(iterable, lang):
         raise ValueError(f"Unsupported Language ({lang})")
 
 
-def get_letter_index_pairs(key, lang):
+def get_letter_index_pairs(key: str, lang: Literal["EN", "TR"]) -> List[ Tuple[str, str] ]:
+    """
+    Returns a list of tuples where the first element in each tuple is a letter from the given key
+    and the second element is the position of that letter in the alphabet of the given langauge
+    """
+
+    if lang not in ["TR", "EN"]:
+        raise ValueError(f"Unsupported Language ({lang})")
 
     # Used a list here instead of a dict to account for repeating letters in given Key
     if lang == "TR":
@@ -33,31 +46,141 @@ def get_letter_index_pairs(key, lang):
     elif lang == "EN":
         return [[letter, ENGLISH_ALPHABET[letter]] for letter in key]
 
-    else:
-        raise ValueError(f"Unsupported Language ({lang})")
 
-
-def order_key(key, lang):
+def order_key(key: str, lang: Literal["EN", "TR"]) -> List[int]:
 
     letter_index_pairs = get_letter_index_pairs(key, lang)
-
-    # Get column numbers based on alphabetical order of key
 
     # NOTE
     #   if key has repeating letters, then recurring letters are numbered
     #   sequentially in order of appearance in key
 
+    # Get column numbers based on alphabetical order of key
     for letter_index, pair in enumerate(custom_sort(letter_index_pairs, lang)):
         pair[1] = letter_index + 1
 
     return [letter_index_pairs.index(pair) + 1 for pair in custom_sort(letter_index_pairs, lang)]
 
 
-def get_transposed(matrix):
+def get_transposed(matrix: List[List['str']]) -> List[List['str']]:
+    """
+    Returns transpose of given matrix
+    """
     return list(map(list, zip(*matrix)))
 
 
-def luigi_sacco_encrypt(key, plain_text, lang="TR", verbose=False):
+def get_indices_of_extra_letters(row: List[str], split: int, key_length: int) -> List[int]:
+    """
+    Returns indices of all letters which don't belong in a row because they make its length bigger
+    than the given split.
+    """
+
+    row_without_placeholder = ''.join(char for char in row if char != '_')
+    difference = len(row_without_placeholder) - split
+
+    difference = key_length - split
+
+    if difference == 0:
+        return []
+
+    # Extra letter indices start from the split's index and go till the end of that row
+    indices_of_extra_letters = [i for i in range(split, key_length)]
+
+    # Remove indices of '_' placeholders, and make sure the indices list is only
+    # as long as the original key
+    indices_of_extra_letters = [e for e in indices_of_extra_letters[:key_length] if row[e] != '_']
+
+    return indices_of_extra_letters
+
+
+def recursive_push_down(matrix: List[List['str']], row: int, index_of_letter_to_be_pushed_down: int) -> None:
+    """
+    Recursive function to push down a given element in a matrix one row down.
+
+    If there is another element below the given element, then it is recursively
+    pushed down first.
+
+    WARNING: This has not been tested if the entire column below the given element is full.
+    """
+
+    # Check if below space is empty or not (empty means '_')
+    if matrix[row + 1][index_of_letter_to_be_pushed_down] != '_':
+        recursive_push_down(matrix, row + 1, index_of_letter_to_be_pushed_down)
+
+    # Place given element to at the row below its current row, and replace its
+    # original position with the placehoder '_'
+    matrix[row + 1][index_of_letter_to_be_pushed_down] = matrix[row][index_of_letter_to_be_pushed_down]
+    matrix[row][index_of_letter_to_be_pushed_down] = '_'
+
+
+def push_down(matrix: List[List['str']], row: int, split: int, verbose: bool, key_length: int):
+    """
+    Pushes all extra letters in given row of given matrix down one row.
+    """
+
+    # Get extra letter indices for this current row
+    indices_of_extra_letters = get_indices_of_extra_letters(matrix[row], split, key_length)
+
+    # Push each of these extra letters down one row
+    for i in indices_of_extra_letters:
+
+        recursive_push_down(matrix, row, i)
+
+        if verbose:
+            print(f"\t\t\n\n\nIteration {i}")
+            [print(row) for row in matrix]
+
+
+def distribute_letters_across_matrix(matrix: List[List['str']], splits: List[int], verbose: bool) -> List[List['str']]:
+    """
+    Algorithm works as follows:
+        Starting from first row, make sure there are only as many chars in it as the split
+
+        'PUSH' down any extra characters in the row to the row below it
+
+        If the row below has characters filling up the space where we want to push
+        the extra characters, then push them down as well.
+
+    """
+
+    # Copying matrix to avoid changing the passed in matrix
+    matrix = [[element for element in row] for row in matrix]
+
+    # NOTE
+    #   if we had a long message, we'd have more rows than there are splits.
+    #   I fix this by repeating the key as many times as needed
+    #
+    #   This is assuming that the luigi sacco transposition algorithm would
+    #   function like this in the first place, but who's checking?
+    #
+
+    extended_splits = [element for element in splits]
+
+    while len(extended_splits) < len(matrix):
+        extended_splits += splits
+
+    # The key is cut at the amount of rows the matrix has to avoid IndexError exceptions
+    extended_splits = extended_splits[:len(matrix)]
+
+    # push down extra letters in each row so elements in matrix take correct positions
+    for (row_index, row), split in zip(enumerate(matrix), extended_splits):
+        if len(row) != split:
+            # Note: passing in original key length here because it's used to
+            # infer necessary number of columns in matrix
+            push_down(matrix, row_index, split, verbose, key_length=len(splits))
+
+    if verbose:
+        print("\n\n\n\t\t*** SHAPE OF MATRIX AT THE END ***\n")
+        [print(row) for row in matrix]
+        print("\n\n")
+
+    return matrix
+
+
+def luigi_sacco_encrypt(key: str, plain_text: str, lang: Literal["EN", "TR"] = "TR", verbose: bool=False) -> str:
+    """
+    Encrypts given plain text message using given key.
+    """
 
     key = key.upper()
 
@@ -76,33 +199,29 @@ def luigi_sacco_encrypt(key, plain_text, lang="TR", verbose=False):
         print(key_length)
 
     # NOTES
-    #   I could probably get away with not splitting a very message into multiple
-    #   bits if I can get gud with matrix operations
-    #
     #   A Row will NEVER be longer than the length of the key by definition of this encryption method
     #
     #   Columns may be longer than the key length depending on length of plain text
 
+    # This is the matrix that you will see under the 'luigi sacco' section in the teacher's notes
     initial_matrix = []
 
     while len(plain_text) > 0:
 
         for split in splits:
-            message_row = []
-            while split != 0:
-                try:
-                    message_row.append(plain_text[0])
-                    plain_text = plain_text[1:]
-                    split -= 1
 
-                # TODO: check how sturdy this actually is
-                except IndexError:
-                    break
+            new_row = []
 
-            filler = ['_' for i in range(key_length - len(message_row))]
-            initial_matrix.append(message_row + filler)
+            while split != 0 and len(plain_text) > 0:
+                new_row.append(plain_text[0])
+                plain_text = plain_text[1:]
+                split -= 1
 
-    # Must fill up 'empty spaces' in message matrix to be able to get the final form
+
+            filler = ['_' for i in range(key_length - len(new_row))]
+            initial_matrix.append(new_row + filler)
+
+    # fill up 'empty spaces' in message matrix to be able to get the final form
     max_row_length = len(max(initial_matrix, key=len))
 
     for row in initial_matrix:
@@ -120,108 +239,30 @@ def luigi_sacco_encrypt(key, plain_text, lang="TR", verbose=False):
         print("\nTransposed Matrix")
         [print(row) for row in transposed_matrix]
 
-    # Pick the words of the message in the order provided by the splits.
 
     final_message_matrix = []
 
+    # Pick the words of the message in the order provided by the splits.
     for row_index in splits:
         if row_index <= len(transposed_matrix):
             final_message_matrix.append(transposed_matrix[row_index - 1])
-
-    # final_message_matrix = [transposed_matrix[row-1] for row in splits if row <= len(transposed_matrix)]
 
     if verbose:
         print(splits)
         print("\nFinal Message Matrix")
         [print(row) for row in final_message_matrix]
 
+    # NOTE: This returns the message separated by spaces which is not how it's supposed to be
     # Removing underscores and joining message together
-    final_message = ' '.join([''.join(row).replace('_', '')
-                             for row in final_message_matrix])
+    final_message = ' '.join([''.join(row).replace('_', '') for row in final_message_matrix])
 
     return final_message
 
 
-def get_indices_of_extra_letters(row, split, key_length):
-
-    row_without_placeholder = ''.join(char for char in row if char != '_')
-    difference = len(row_without_placeholder) - split
-
-    difference = key_length - split
-
-    if difference == 0:
-        return []
-
-    indices_of_extra_letters = [i for i in range(key_length - difference, key_length)]
-
-    indices_of_extra_letters = [e for e in indices_of_extra_letters[:key_length] if row[e] != '_']
-
-    # print(f"\nExtra indices in {row} are {indices_of_extra_letters}")
-
-    return indices_of_extra_letters
-
-
-def recursive_push_down(matrix, row, index_of_letter_to_be_pushed_down):
-
-    # If space is empty, then just set character where it needs to go:
-    if matrix[row + 1][index_of_letter_to_be_pushed_down] != '_':
-        # Clear below space
-        recursive_push_down(matrix, row + 1, index_of_letter_to_be_pushed_down)
-
-    matrix[row + 1][index_of_letter_to_be_pushed_down] = matrix[row][index_of_letter_to_be_pushed_down]
-    matrix[row][index_of_letter_to_be_pushed_down] = '_'
-
-
-def push_down(matrix, row, split, verbose, key_length):
-    # indices_of_extra_letters = [i for i in range(split, len(matrix[row]))]
-    indices_of_extra_letters = get_indices_of_extra_letters(
-        matrix[row], split, key_length)
-
-    for i in indices_of_extra_letters:
-
-        recursive_push_down(matrix, row, i)
-
-        if verbose:
-            print(f"\t\t\n\n\nIteration {i}")
-            [print(row) for row in matrix]
-
-
-
-def super_sophisticated_matrix_transformation_algorithm(matrix, splits, verbose):
-
-    # Starting from first row, make sure there are only as many chars in it as the split
-
-    # 'PUSH' down any extra characters in the row to the row below it
-
-    # If the row below has characters filling up the space where we want to push
-    # the extra characters, then push them down as well.
-
-    # Copying matrix to avoid changing the passed in matrix
-    matrix = [[element for element in row] for row in matrix]
-
-    # NOTE: if we had a long message, we'd have more rows than there are splits.
-    # I just fixed this by repeating the key as many times as needed
-
-    modded_splits = [element for element in splits]
-    
-    while len(modded_splits) < len(matrix):
-        modded_splits += splits
-
-    modded_splits = modded_splits[:len(matrix)]
-    
-    for (i, row), split in zip(enumerate(matrix), modded_splits):
-        if len(row) != split:
-            push_down(matrix, i, split, verbose, key_length=len(splits))
-
-    if verbose:
-        print("\n\n\n\t\t*** SHAPE OF MATRIX AT THE END ***\n")
-        [print(row) for row in matrix]
-        print("\n\n")
-
-    return matrix
-
-
-def luigi_sacco_decrypt(key, encrypted_text, lang="TR", verbose=False):
+def luigi_sacco_decrypt(key: str, encrypted_text: str, lang: Literal["EN", "TR"] = "TR", verbose: bool = False) -> str:
+    """
+    Decrypts given encrypted message using given key.
+    """
 
     key = key.upper()
 
@@ -230,13 +271,19 @@ def luigi_sacco_decrypt(key, encrypted_text, lang="TR", verbose=False):
     if verbose:
         print(splits)
 
+    # NOTE
+    #   The step below will be removed after I correctly implement an algorithm
+    #   to get the encrypted text without spaces
     encrypted_text = encrypted_text.split(' ')
 
+    # Create empty matrix
     transposed_matrix = [[] for _ in range(len(splits))]
 
+    # Fill 'er up
     for word, split in zip(encrypted_text, splits):
         # Split word in character list and assign to relevant column
         transposed_matrix[split - 1] = [char for char in word]
+
 
     # Filling in empty spaces with '_' to transpose matrix (because function has
     # trouble with 'jagged' matrices)
@@ -250,27 +297,32 @@ def luigi_sacco_decrypt(key, encrypted_text, lang="TR", verbose=False):
         print("\nTransposed Matrix")
         [print(row) for row in transposed_matrix]
 
+    # This has the same shape as the initial matrix in the encrypting function
+    # but the positions of the letters are not correct
     initial_matrix = get_transposed(transposed_matrix)
 
     if verbose:
         print("\n")
         [print(row) for row in initial_matrix]
 
-    # Clearing the '_' to make next step easier
-    # initial_matrix = [ [element for element in row if element != '_'] for row in initial_matrix]
+    # This final step places the letters in their correct positions
+    final_matrix = distribute_letters_across_matrix(initial_matrix, splits, verbose)
 
-    final_matrix = super_sophisticated_matrix_transformation_algorithm(
-        initial_matrix, splits, verbose)
+    decrypted_message = ''.join([''.join(row).replace('_', '') for row in final_matrix])
 
-    return ''.join([''.join(row).replace('_', '') for row in final_matrix])
+    return decrypted_message
 
 
-def test_program(key, plain_text, lang="TR", verbose=False):
+def test_program(key: str, plain_text: str, lang: Literal["EN", "TR"] = "TR", verbose=False) -> bool:
+    """
 
-    encrypted_message = luigi_sacco_encrypt(
-        key, plain_text, lang=lang, verbose=False)
-    decrypted_message = luigi_sacco_decrypt(
-        key, encrypted_message, lang=lang, verbose=False)
+    """
+
+    encrypted_message = luigi_sacco_encrypt(key, plain_text, lang=lang, verbose=False)
+
+    # Feeding the encryption function's output to this function to ensure they
+    # both work correctly
+    decrypted_message = luigi_sacco_decrypt(key, encrypted_message, lang=lang, verbose=False)
 
     correctly_encrypted_and_decrypted = \
         decrypted_message.replace(' ', '').upper() == plain_text.replace(' ', '').upper()
@@ -337,7 +389,7 @@ def execute_english_tests():
     if incorrect_combos:
         print("\nFaulty Combinations:")
         [print(row) for row in incorrect_combos]
-    
+
     else:
         print("""
 
@@ -388,7 +440,7 @@ def execute_turkish_tests():
     if incorrect_combos:
         print("\nFaulty Combinations:")
         [print(row) for row in incorrect_combos]
-    
+
     else:
         print("""
 
@@ -401,29 +453,10 @@ def execute_turkish_tests():
         """)
 
 
-
 if __name__ == '__main__':
 
-    # TODO: add turkish tests
-
     # TODO: add checks to make sure user has entered letters from the language they've chosen
-
-    # FIXME
-    #   if key is too short, then the output of the decryption is wrong
-    #   (it's correct upto a certain amount of characters tho)
-
-    # key = "TERAZİ"
-    # plain_text = "ADALET MÜLKÜN TEMELİDİR"
-
-    # key = "CONVENIENCE"
-    # plain_text = "HERE IS A SECRET MESSAGE ENCIPHERED BY TRANSPOSITION"
-
-    # key = "SPANISHINQUISITION"
-    # plain_text = "NO ONE EXPECTS THE SPANISH INQUISITION"
-
-    # key = "AZİZNALISMYNAME"
-    # key = "AZİZNAL"
-    # plain_text = "BUGÜN ÇOK İYİ BİR GÜN OLACAK"
+    # TODO: create function to clean key and plain text before passing them to encrypt/decrypt functions
 
     execute_english_tests()
 
