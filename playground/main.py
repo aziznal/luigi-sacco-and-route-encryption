@@ -1,4 +1,5 @@
 import string
+import re
 
 from typing import Iterable, Literal, Union, List, Tuple
 
@@ -177,7 +178,33 @@ def distribute_letters_across_matrix(matrix: List[List['str']], splits: List[int
     return matrix
 
 
-def luigi_sacco_encrypt(key: str, plain_text: str, lang: Literal["EN", "TR"] = "TR", verbose: bool=False) -> str:
+
+def get_split_encrypted_text(key, encrypted_text, lang):
+    """
+    Returns the given encrypted text (given without white spaces) split up into
+    correctly size chunks (words). This is done by encrypting a message of the
+    same size but setting the output to include white space, and inferring the
+    word sizes from it.
+    """
+    mock_msg = "A"*len(encrypted_text)
+
+    # This gives me the message in the shape that I need
+    mock_enc = luigi_sacco_encrypt(key, mock_msg, lang, with_spaces=True)
+
+    word_lengths = [len(word) for word in mock_enc.split(' ')]
+
+    modded_encrypted_text = []
+
+    current_index = 0
+
+    for i in word_lengths:
+        modded_encrypted_text.append(encrypted_text[current_index:current_index+i])
+        current_index += i
+
+    return modded_encrypted_text
+
+
+def luigi_sacco_encrypt(key: str, plain_text: str, lang: Literal["EN", "TR"] = "TR", verbose: bool=False, with_spaces: bool = False) -> str:
     """
     Encrypts given plain text message using given key.
     """
@@ -252,9 +279,11 @@ def luigi_sacco_encrypt(key: str, plain_text: str, lang: Literal["EN", "TR"] = "
         print("\nFinal Message Matrix")
         [print(row) for row in final_message_matrix]
 
-    # NOTE: This returns the message separated by spaces which is not how it's supposed to be
     # Removing underscores and joining message together
     final_message = ' '.join([''.join(row).replace('_', '') for row in final_message_matrix])
+
+    if not with_spaces:
+        final_message = final_message.replace(' ', '')
 
     return final_message
 
@@ -266,15 +295,20 @@ def luigi_sacco_decrypt(key: str, encrypted_text: str, lang: Literal["EN", "TR"]
 
     key = key.upper()
 
+
+    # Clear any spaces in the encrypted text
+    encrypted_text = encrypted_text.replace(' ', '')
+
     splits = order_key(key, lang)
 
     if verbose:
         print(splits)
 
+
     # NOTE
     #   The step below will be removed after I correctly implement an algorithm
     #   to get the encrypted text without spaces
-    encrypted_text = encrypted_text.split(' ')
+    encrypted_text = get_split_encrypted_text(key, encrypted_text, lang)
 
     # Create empty matrix
     transposed_matrix = [[] for _ in range(len(splits))]
@@ -362,9 +396,9 @@ def execute_english_tests():
     ]
 
     messages = [
-        "What a wonderful world we live in",
-        "Armies are ready",
-        "Tell everyone that their message should not be too long otherwise the encryption algorithm has trouble with it",
+        "Whatawonderfulworldwelivein",
+        "Armiesareready",
+        "Telleveryonethattheirmessageshouldnotbe too long otherwise the encryption algorithm has trouble with it",
         "short"
     ]
 
@@ -456,8 +490,57 @@ def execute_turkish_tests():
 if __name__ == '__main__':
 
     # TODO: add checks to make sure user has entered letters from the language they've chosen
+
     # TODO: create function to clean key and plain text before passing them to encrypt/decrypt functions
+
+    # TODO: adjust decryption function so that it takes a string with no spaces and infers the splits from it
 
     execute_english_tests()
 
     execute_turkish_tests()
+
+
+    # key = "TERAZİ"
+    # message = "ADALET MÜLKÜN TEMELİDİR"
+
+    # enc = luigi_sacco_encrypt(key, message, lang="TR")
+    # print(enc)
+
+    # splits = order_key(key, "TR")
+    # print("\nSplits:")
+    # print(f"\n\t{splits}")
+
+    
+    # # removing spaces from encrypted message
+    # enc = enc.replace(' ', '')
+
+
+    # print(len(enc))
+    
+    # mock_msg = "A"*len(enc)
+
+    # # This gives me the message in the shape that I need
+    # mock_enc = luigi_sacco_encrypt(key, mock_msg, "TR", with_spaces=True)
+
+    # word_lengths = [len(word) for word in mock_enc.split(' ')]
+    
+    # print("\nWord Lengths:")
+    # print(f"\n\t{word_lengths}")
+
+    # modded_enc = []
+
+    # current_index = 0
+
+    # for i in word_lengths:
+    #     modded_enc.append(enc[current_index:current_index+i])
+    #     current_index += i
+
+
+    # # Put modded message back together
+    # modded_enc = ' '.join(modded_enc)
+
+    # print("\n\nEncrypted Message (Modded):")
+    # print(f"\n\t{modded_enc}")
+
+    # dec = luigi_sacco_decrypt(key, modded_enc, "TR")
+    # print(dec)
