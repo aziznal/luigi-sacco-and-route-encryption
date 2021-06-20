@@ -3,7 +3,7 @@ from PyQt5.QtGui import QPixmap
 
 from gui import Gui
 
-from playground.main import luigi_sacco_encrypt, luigi_sacco_decrypt
+from logic.luigi_sacco import luigi_sacco_encrypt, luigi_sacco_decrypt
 
 import utils
 
