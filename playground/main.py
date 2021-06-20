@@ -525,12 +525,6 @@ def execute_turkish_tests():
 
 if __name__ == '__main__':
 
-    # TODO: add checks to make sure user has entered letters from the language they've chosen
-
-    # TODO: create function to clean key and plain text before passing them to encrypt/decrypt functions
-
-    # TODO: adjust decryption function so that it takes a string with no spaces and infers the splits from it
-
     execute_english_tests()
 
     execute_turkish_tests()
