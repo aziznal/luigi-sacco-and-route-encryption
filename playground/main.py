@@ -300,16 +300,16 @@ def test_program(key, plain_text, lang="TR", verbose=False):
     return correctly_encrypted_and_decrypted
 
 
-def execute_all_tests():
+def execute_english_tests():
 
-    english_keys = [
+    keys = [
         "helloworld",
         "thisisaverylongkeyindeed",
         "short",
         "MuLtiPlEcASe"
     ]
 
-    english_messages = [
+    messages = [
         "What a wonderful world we live in",
         "Armies are ready",
         "Tell everyone that their message should not be too long otherwise the encryption algorithm has trouble with it",
@@ -321,8 +321,8 @@ def execute_all_tests():
 
     incorrect_combos = []
 
-    for key in english_keys:
-        for message in english_messages:
+    for key in keys:
+        for message in messages:
             total += 1
             is_correct = test_program(key, message, lang="EN", verbose=False)
 
@@ -333,8 +333,73 @@ def execute_all_tests():
                 incorrect_combos.append([key, message])
 
     print(f"Got {total_correct} correct out of {total}")
-    print("\nFaulty Combinations:")
-    [print(row) for row in incorrect_combos]
+
+    if incorrect_combos:
+        print("\nFaulty Combinations:")
+        [print(row) for row in incorrect_combos]
+    
+    else:
+        print("""
+
+            * * * * * * * * * * * * * * * * *  
+            *                               *
+            *   ALL ENGLISH TESTS PASSED!   *
+            *                               *
+            * * * * * * * * * * * * * * * * *  
+
+        """)
+
+
+def execute_turkish_tests():
+    keys = [
+        "TERAZİ",
+        "MATEMATİK",
+        "ÇOKÇOKÇOKUZUNBİRANAHTAR",
+        "KISA",
+        "Aaa",
+        "büYüKveKüçükharf",
+        "iİıIçÇüÜuöÖşŞ"
+    ]
+
+    messages = [
+        "ADALET MÜLKÜN TEMELİDİR",
+        "Mülkün temeli adalettir ve dolayısıyla adalet mülkün temeildir",
+        "buraya inanılmaz uzun bir cümle yazdığım halde acaba program çöker mi falan yoksa gerektiği gibi gene çalışır mı yani mesela devam edip hiç durmasam yazmaya devam devam devam devam valla bir hata vermyior gerçekten çok ilginç analaşılan ki çok iyi bir program yazmış oldum hahahahaha helal olsun bana"
+    ]
+
+    total = 0
+    total_correct = 0
+
+    incorrect_combos = []
+
+    for key in keys:
+        for message in messages:
+            total += 1
+            is_correct = test_program(key, message, lang="TR", verbose=False)
+
+            if is_correct:
+                total_correct += 1
+
+            else:
+                incorrect_combos.append([key, message])
+
+    print(f"Got {total_correct} correct out of {total}")
+
+    if incorrect_combos:
+        print("\nFaulty Combinations:")
+        [print(row) for row in incorrect_combos]
+    
+    else:
+        print("""
+
+            * * * * * * * * * * * * * * * * *  
+            *                               *
+            *   ALL TURKISH TESTS PASSED!   *
+            *                               *
+            * * * * * * * * * * * * * * * * *  
+
+        """)
+
 
 
 if __name__ == '__main__':
@@ -360,27 +425,6 @@ if __name__ == '__main__':
     # key = "AZİZNAL"
     # plain_text = "BUGÜN ÇOK İYİ BİR GÜN OLACAK"
 
-    
-    # test_program(
-    #     key="helloworld",
-    #     plain_text="tell everyone that their message should not be too long otherwise the encryption algorithm has trouble with it",
-    #     lang="EN",
-    #     verbose=True
-    # )
+    execute_english_tests()
 
-    # test_program(
-    #     key="short",
-    #     plain_text="What a wonderful world we live in",
-    #     lang="EN",
-    #     verbose=True
-    # )
-
-    # test_program(
-    #     key="short",
-    #     plain_text="tell everyone that their message should not be too long otherwise the encryption algorithm has trouble with it",
-    #     lang="EN",
-    #     verbose=True
-    # )
-
-
-    execute_all_tests()
+    execute_turkish_tests()
