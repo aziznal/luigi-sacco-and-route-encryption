@@ -280,7 +280,7 @@ QPushButton:hover {
       </font>
      </property>
      <property name="text">
-      <string>Plaint Text / Encrpyted Message Input</string>
+      <string>Plain Text / Encrypted Message Input</string>
      </property>
     </widget>
     <widget class="QTextEdit" name="inputTextEdit">

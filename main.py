@@ -116,7 +116,6 @@ def reset_luigi_sacco(window: Gui):
     window.get_widget('outputTextEdit').clear()
 
 
-
 def add_luigi_sacco_hooks(window: Gui):
 
     # Check English and Encrypt by default
