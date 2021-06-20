@@ -152,11 +152,9 @@ def get_indices_of_extra_letters(row, split, key_length):
     if difference == 0:
         return []
 
-    # indices_of_extra_letters = [i for i in range(split, split + difference)]
-    indices_of_extra_letters = [i for i in range(
-        key_length - difference, key_length)]
-    indices_of_extra_letters = [
-        e for e in indices_of_extra_letters if row[e] != '_']
+    indices_of_extra_letters = [i for i in range(key_length - difference, key_length)]
+
+    indices_of_extra_letters = [e for e in indices_of_extra_letters[:key_length] if row[e] != '_']
 
     # print(f"\nExtra indices in {row} are {indices_of_extra_letters}")
 
@@ -181,16 +179,12 @@ def push_down(matrix, row, split, verbose, key_length):
 
     for i in indices_of_extra_letters:
 
-        try:
-            # Something's wrong with the recursive algorithm
-            recursive_push_down(matrix, row, i)
+        recursive_push_down(matrix, row, i)
 
-            if verbose:
-                print(f"\t\t\n\n\nIteration {i}")
-                [print(row) for row in matrix]
+        if verbose:
+            print(f"\t\t\n\n\nIteration {i}")
+            [print(row) for row in matrix]
 
-        except:
-            pass
 
 
 def super_sophisticated_matrix_transformation_algorithm(matrix, splits, verbose):
@@ -206,16 +200,18 @@ def super_sophisticated_matrix_transformation_algorithm(matrix, splits, verbose)
     matrix = [[element for element in row] for row in matrix]
 
     # NOTE: if we had a long message, we'd have more rows than there are splits.
-    # and this code would fail. Solution is to divide message into 6 row matrices whenever
-    # message is longer than 6 rows, and apply this algorithm on each of those matrices.
+    # I just fixed this by repeating the key as many times as needed
 
-    # while len([char for char in matrix[-1] if char != '_']) != splits[-1]:
+    modded_splits = [element for element in splits]
+    
+    while len(modded_splits) < len(matrix):
+        modded_splits += splits
 
-    # There should be a while loop with some condition here
-    for _ in range(100):
-        for (i, row), split in zip(enumerate(matrix), splits):
-            if len(row) != split:
-                push_down(matrix, i, split, verbose, key_length=len(splits))
+    modded_splits = modded_splits[:len(matrix)]
+    
+    for (i, row), split in zip(enumerate(matrix), modded_splits):
+        if len(row) != split:
+            push_down(matrix, i, split, verbose, key_length=len(splits))
 
     if verbose:
         print("\n\n\n\t\t*** SHAPE OF MATRIX AT THE END ***\n")
@@ -274,10 +270,10 @@ def test_program(key, plain_text, lang="TR", verbose=False):
     encrypted_message = luigi_sacco_encrypt(
         key, plain_text, lang=lang, verbose=False)
     decrypted_message = luigi_sacco_decrypt(
-        key, encrypted_message, lang=lang, verbose=True)
+        key, encrypted_message, lang=lang, verbose=False)
 
-    correctly_encrypted_and_decrypted = decrypted_message.replace(
-        ' ', '').upper() == plain_text.replace(' ', '').upper()
+    correctly_encrypted_and_decrypted = \
+        decrypted_message.replace(' ', '').upper() == plain_text.replace(' ', '').upper()
 
     if verbose:
         print(f"\n\n\nOriginal Message:")
@@ -365,12 +361,12 @@ if __name__ == '__main__':
     # plain_text = "BUGÜN ÇOK İYİ BİR GÜN OLACAK"
 
     
-    test_program(
-        key="helloworld",
-        plain_text="tell everyone that their message should not be too long otherwise the encryption algorithm has trouble with it",
-        lang="EN",
-        verbose=True
-    )
+    # test_program(
+    #     key="helloworld",
+    #     plain_text="tell everyone that their message should not be too long otherwise the encryption algorithm has trouble with it",
+    #     lang="EN",
+    #     verbose=True
+    # )
 
     # test_program(
     #     key="short",
@@ -387,4 +383,4 @@ if __name__ == '__main__':
     # )
 
 
-    # execute_all_tests()
+    execute_all_tests()
