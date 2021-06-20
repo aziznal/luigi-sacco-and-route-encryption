@@ -1,5 +1,5 @@
 import string
-import re
+import traceback
 
 from typing import Iterable, Literal, Union, List, Tuple
 
@@ -178,8 +178,7 @@ def distribute_letters_across_matrix(matrix: List[List['str']], splits: List[int
     return matrix
 
 
-
-def get_split_encrypted_text(key, encrypted_text, lang):
+def get_split_encrypted_text(key: str, encrypted_text: str, lang: str) -> List[str]:
     """
     Returns the given encrypted text (given without white spaces) split up into
     correctly size chunks (words). This is done by encrypting a message of the
@@ -204,18 +203,55 @@ def get_split_encrypted_text(key, encrypted_text, lang):
     return modded_encrypted_text
 
 
+def confirm_text_in_correct_lang(text: str, lang: Literal["EN", "TR"]) -> None:
+    """
+    Checks whether given text has any characters that don't belong in the given
+    language (such as Q or W in turkish)
+    """
+
+    if lang not in ["EN", "TR"]:
+        raise ValueError(f"Given language is not supported ({lang})")
+
+    try:
+        if lang == "TR":
+            for char in text:
+                if char not in TURKISH_ALPHABET:
+                    raise ValueError()
+
+        elif lang == "EN":
+            for char in text:
+                if char not in ENGLISH_ALPHABET:
+                    raise ValueError()
+
+    except ValueError as e:
+        raise ValueError(
+            f"Given text does not seem to belong to the group '{lang}'")
+
+
+def format_key_and_input_text(key: str, input_text: str) -> Tuple[str, str]:
+    """
+    Returns a tuple of given key and input text stripped of all double spaces,
+    and converted into upper case letters.
+    """
+
+    def format(x): return x.upper().replace(' ', '')
+
+    formatted_key = format(key)
+    formatted_input_text = format(input_text)
+
+    return formatted_key, formatted_input_text
+
+
+### ENCRYPT
 def luigi_sacco_encrypt(key: str, plain_text: str, lang: Literal["EN", "TR"] = "TR", verbose: bool=False, with_spaces: bool = False) -> str:
     """
     Encrypts given plain text message using given key.
     """
 
-    key = key.upper()
+    key, plain_text = format_key_and_input_text(key, plain_text)
 
-    # Remove all spaces and symbols and capitalize text
-    plain_text = plain_text.replace(' ', '')
-    plain_text = plain_text.upper()
-    for symbol in string.punctuation:
-        plain_text = plain_text.replace(symbol, '')
+    confirm_text_in_correct_lang(key, lang)
+    confirm_text_in_correct_lang(plain_text, lang)
 
     # Get column splits from key
     splits = order_key(key, lang)
@@ -288,26 +324,23 @@ def luigi_sacco_encrypt(key: str, plain_text: str, lang: Literal["EN", "TR"] = "
     return final_message
 
 
+### DECRYPT
 def luigi_sacco_decrypt(key: str, encrypted_text: str, lang: Literal["EN", "TR"] = "TR", verbose: bool = False) -> str:
     """
     Decrypts given encrypted message using given key.
     """
+    key, encrypted_text = format_key_and_input_text(key, encrypted_text)
+    
+    confirm_text_in_correct_lang(key, lang)
+    confirm_text_in_correct_lang(encrypted_text, lang)
 
-    key = key.upper()
-
-
-    # Clear any spaces in the encrypted text
-    encrypted_text = encrypted_text.replace(' ', '')
+    # Start of decryption #
 
     splits = order_key(key, lang)
 
     if verbose:
         print(splits)
 
-
-    # NOTE
-    #   The step below will be removed after I correctly implement an algorithm
-    #   to get the encrypted text without spaces
     encrypted_text = get_split_encrypted_text(key, encrypted_text, lang)
 
     # Create empty matrix
@@ -332,7 +365,7 @@ def luigi_sacco_decrypt(key: str, encrypted_text: str, lang: Literal["EN", "TR"]
         [print(row) for row in transposed_matrix]
 
     # This has the same shape as the initial matrix in the encrypting function
-    # but the positions of the letters are not correct
+    # but the positions of the letters are not correct yet
     initial_matrix = get_transposed(transposed_matrix)
 
     if verbose:
@@ -392,7 +425,8 @@ def execute_english_tests():
         "helloworld",
         "thisisaverylongkeyindeed",
         "short",
-        "MuLtiPlEcASe"
+        "MuLtiPlEcASe",
+        "how about a key which is COMPLETELY WAY TOO LONG PLEASE MAKE IT STOP AHHHHHH"
     ]
 
     messages = [
@@ -444,13 +478,15 @@ def execute_turkish_tests():
         "KISA",
         "Aaa",
         "büYüKveKüçükharf",
-        "iİıIçÇüÜuöÖşŞ"
+        "iİıIçÇüÜuöÖşŞ",
+        "boşluk ek le sem"
     ]
 
     messages = [
         "ADALET MÜLKÜN TEMELİDİR",
         "Mülkün temeli adalettir ve dolayısıyla adalet mülkün temeildir",
-        "buraya inanılmaz uzun bir cümle yazdığım halde acaba program çöker mi falan yoksa gerektiği gibi gene çalışır mı yani mesela devam edip hiç durmasam yazmaya devam devam devam devam valla bir hata vermyior gerçekten çok ilginç analaşılan ki çok iyi bir program yazmış oldum hahahahaha helal olsun bana"
+        "buraya inanılmaz uzun bir cümle yazdığım halde acaba program çöker mi falan yoksa gerektiği gibi gene çalışır mı yani mesela devam edip hiç durmasam yazmaya devam devam devam devam valla bir hata vermyior gerçekten çok ilginç analaşılan ki çok iyi bir program yazmış oldum hahahahaha helal olsun bana",
+        "vay beeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
     ]
 
     total = 0
@@ -498,49 +534,3 @@ if __name__ == '__main__':
     execute_english_tests()
 
     execute_turkish_tests()
-
-
-    # key = "TERAZİ"
-    # message = "ADALET MÜLKÜN TEMELİDİR"
-
-    # enc = luigi_sacco_encrypt(key, message, lang="TR")
-    # print(enc)
-
-    # splits = order_key(key, "TR")
-    # print("\nSplits:")
-    # print(f"\n\t{splits}")
-
-    
-    # # removing spaces from encrypted message
-    # enc = enc.replace(' ', '')
-
-
-    # print(len(enc))
-    
-    # mock_msg = "A"*len(enc)
-
-    # # This gives me the message in the shape that I need
-    # mock_enc = luigi_sacco_encrypt(key, mock_msg, "TR", with_spaces=True)
-
-    # word_lengths = [len(word) for word in mock_enc.split(' ')]
-    
-    # print("\nWord Lengths:")
-    # print(f"\n\t{word_lengths}")
-
-    # modded_enc = []
-
-    # current_index = 0
-
-    # for i in word_lengths:
-    #     modded_enc.append(enc[current_index:current_index+i])
-    #     current_index += i
-
-
-    # # Put modded message back together
-    # modded_enc = ' '.join(modded_enc)
-
-    # print("\n\nEncrypted Message (Modded):")
-    # print(f"\n\t{modded_enc}")
-
-    # dec = luigi_sacco_decrypt(key, modded_enc, "TR")
-    # print(dec)
