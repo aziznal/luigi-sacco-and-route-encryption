@@ -6,6 +6,7 @@ TURKISH_ALPHABET = {letter: letter_index for letter_index,
 ENGLISH_ALPHABET = {letter: letter_index for letter_index,
                     letter in enumerate(string.ascii_uppercase)}
 
+
 def custom_sort(iterable, lang):
     if lang == "TR":
         return sorted(
@@ -27,10 +28,10 @@ def get_letter_index_pairs(key, lang):
 
     # Used a list here instead of a dict to account for repeating letters in given Key
     if lang == "TR":
-        return [ [letter, TURKISH_ALPHABET[letter]] for letter in key]
+        return [[letter, TURKISH_ALPHABET[letter]] for letter in key]
 
     elif lang == "EN":
-        return [ [letter, ENGLISH_ALPHABET[letter]] for letter in key]
+        return [[letter, ENGLISH_ALPHABET[letter]] for letter in key]
 
     else:
         raise ValueError(f"Unsupported Language ({lang})")
@@ -80,7 +81,7 @@ def luigi_sacco_encrypt(key, plain_text, lang="TR", verbose=False):
     #
     #   A Row will NEVER be longer than the length of the key by definition of this encryption method
     #
-    #   Columns may be longer than the key length depending on length of plain text 
+    #   Columns may be longer than the key length depending on length of plain text
 
     initial_matrix = []
 
@@ -97,13 +98,13 @@ def luigi_sacco_encrypt(key, plain_text, lang="TR", verbose=False):
                 # TODO: check how sturdy this actually is
                 except IndexError:
                     break
-                
+
             filler = ['_' for i in range(key_length - len(message_row))]
             initial_matrix.append(message_row + filler)
 
     # Must fill up 'empty spaces' in message matrix to be able to get the final form
     max_row_length = len(max(initial_matrix, key=len))
-    
+
     for row in initial_matrix:
         while len(row) < max_row_length:
             row.append('_')
@@ -120,7 +121,7 @@ def luigi_sacco_encrypt(key, plain_text, lang="TR", verbose=False):
         [print(row) for row in transposed_matrix]
 
     # Pick the words of the message in the order provided by the splits.
-    
+
     final_message_matrix = []
 
     for row_index in splits:
@@ -133,27 +134,29 @@ def luigi_sacco_encrypt(key, plain_text, lang="TR", verbose=False):
         print(splits)
         print("\nFinal Message Matrix")
         [print(row) for row in final_message_matrix]
-    
+
     # Removing underscores and joining message together
-    final_message = ' '.join([''.join(row).replace('_', '') for row in final_message_matrix])
+    final_message = ' '.join([''.join(row).replace('_', '')
+                             for row in final_message_matrix])
 
     return final_message
-
 
 
 def get_indices_of_extra_letters(row, split, key_length):
 
     row_without_placeholder = ''.join(char for char in row if char != '_')
     difference = len(row_without_placeholder) - split
-    
+
     difference = key_length - split
 
     if difference == 0:
         return []
 
     # indices_of_extra_letters = [i for i in range(split, split + difference)]
-    indices_of_extra_letters = [ i for i in range(key_length - difference, key_length) ]
-    indices_of_extra_letters = [ e for e in indices_of_extra_letters if row[e] != '_' ]
+    indices_of_extra_letters = [i for i in range(
+        key_length - difference, key_length)]
+    indices_of_extra_letters = [
+        e for e in indices_of_extra_letters if row[e] != '_']
 
     # print(f"\nExtra indices in {row} are {indices_of_extra_letters}")
 
@@ -167,15 +170,15 @@ def recursive_push_down(matrix, row, index_of_letter_to_be_pushed_down):
         # Clear below space
         recursive_push_down(matrix, row + 1, index_of_letter_to_be_pushed_down)
 
-    
     matrix[row + 1][index_of_letter_to_be_pushed_down] = matrix[row][index_of_letter_to_be_pushed_down]
     matrix[row][index_of_letter_to_be_pushed_down] = '_'
 
 
 def push_down(matrix, row, split, verbose, key_length):
     # indices_of_extra_letters = [i for i in range(split, len(matrix[row]))]
-    indices_of_extra_letters = get_indices_of_extra_letters(matrix[row], split, key_length)
-    
+    indices_of_extra_letters = get_indices_of_extra_letters(
+        matrix[row], split, key_length)
+
     for i in indices_of_extra_letters:
 
         try:
@@ -188,7 +191,7 @@ def push_down(matrix, row, split, verbose, key_length):
 
         except:
             pass
-        
+
 
 def super_sophisticated_matrix_transformation_algorithm(matrix, splits, verbose):
 
@@ -200,7 +203,7 @@ def super_sophisticated_matrix_transformation_algorithm(matrix, splits, verbose)
     # the extra characters, then push them down as well.
 
     # Copying matrix to avoid changing the passed in matrix
-    matrix = [ [element for element in row] for row in matrix ]
+    matrix = [[element for element in row] for row in matrix]
 
     # NOTE: if we had a long message, we'd have more rows than there are splits.
     # and this code would fail. Solution is to divide message into 6 row matrices whenever
@@ -214,7 +217,6 @@ def super_sophisticated_matrix_transformation_algorithm(matrix, splits, verbose)
             if len(row) != split:
                 push_down(matrix, i, split, verbose, key_length=len(splits))
 
-
     if verbose:
         print("\n\n\n\t\t*** SHAPE OF MATRIX AT THE END ***\n")
         [print(row) for row in matrix]
@@ -224,22 +226,21 @@ def super_sophisticated_matrix_transformation_algorithm(matrix, splits, verbose)
 
 
 def luigi_sacco_decrypt(key, encrypted_text, lang="TR", verbose=False):
-    
+
     key = key.upper()
 
     splits = order_key(key, lang)
-    
+
     if verbose:
         print(splits)
 
     encrypted_text = encrypted_text.split(' ')
 
-    transposed_matrix = [ [] for _ in range(len(splits)) ]
+    transposed_matrix = [[] for _ in range(len(splits))]
 
     for word, split in zip(encrypted_text, splits):
         # Split word in character list and assign to relevant column
         transposed_matrix[split - 1] = [char for char in word]
-
 
     # Filling in empty spaces with '_' to transpose matrix (because function has
     # trouble with 'jagged' matrices)
@@ -262,26 +263,29 @@ def luigi_sacco_decrypt(key, encrypted_text, lang="TR", verbose=False):
     # Clearing the '_' to make next step easier
     # initial_matrix = [ [element for element in row if element != '_'] for row in initial_matrix]
 
-    final_matrix = super_sophisticated_matrix_transformation_algorithm(initial_matrix, splits, verbose)
+    final_matrix = super_sophisticated_matrix_transformation_algorithm(
+        initial_matrix, splits, verbose)
 
     return ''.join([''.join(row).replace('_', '') for row in final_matrix])
 
 
-
 def test_program(key, plain_text, lang="TR", verbose=False):
 
-    encrypted_message = luigi_sacco_encrypt(key, plain_text, lang=lang, verbose=False)
-    decrypted_message = luigi_sacco_decrypt(key, encrypted_message, lang=lang, verbose=False)
+    encrypted_message = luigi_sacco_encrypt(
+        key, plain_text, lang=lang, verbose=False)
+    decrypted_message = luigi_sacco_decrypt(
+        key, encrypted_message, lang=lang, verbose=True)
 
-    correctly_encrypted_and_decrypted = decrypted_message.replace(' ', '').upper() == plain_text.replace(' ', '').upper()
+    correctly_encrypted_and_decrypted = decrypted_message.replace(
+        ' ', '').upper() == plain_text.replace(' ', '').upper()
 
     if verbose:
         print(f"\n\n\nOriginal Message:")
         print("\n\t" + plain_text)
-        
+
         print("\n\nEncrypted Message: ")
         print("\n\t" + encrypted_message, end='')
-        if len(encrypted_message.replace(' ' ,'')) == len(plain_text.replace(' ', '')):
+        if len(encrypted_message.replace(' ', '')) == len(plain_text.replace(' ', '')):
             print(" (Lengths match)")
         else:
             print(" (Lengths DON'T match)")
@@ -298,8 +302,6 @@ def test_program(key, plain_text, lang="TR", verbose=False):
             print(key)
 
     return correctly_encrypted_and_decrypted
-
-
 
 
 def execute_all_tests():
@@ -330,9 +332,9 @@ def execute_all_tests():
 
             if is_correct:
                 total_correct += 1
-            
+
             else:
-                incorrect_combos.append( [key, message] )
+                incorrect_combos.append([key, message])
 
     print(f"Got {total_correct} correct out of {total}")
     print("\nFaulty Combinations:")
@@ -342,11 +344,15 @@ def execute_all_tests():
 if __name__ == '__main__':
 
     # TODO: add turkish tests
-    # FIXME: if key is too short, then the output of the decryption is wrong (it's correct upto a certain amount of characters tho)
+
+    # TODO: add checks to make sure user has entered letters from the language they've chosen
+
+    # FIXME
+    #   if key is too short, then the output of the decryption is wrong
+    #   (it's correct upto a certain amount of characters tho)
 
     # key = "TERAZİ"
     # plain_text = "ADALET MÜLKÜN TEMELİDİR"
-
 
     # key = "CONVENIENCE"
     # plain_text = "HERE IS A SECRET MESSAGE ENCIPHERED BY TRANSPOSITION"
@@ -354,13 +360,31 @@ if __name__ == '__main__':
     # key = "SPANISHINQUISITION"
     # plain_text = "NO ONE EXPECTS THE SPANISH INQUISITION"
 
-
     # key = "AZİZNALISMYNAME"
     # key = "AZİZNAL"
     # plain_text = "BUGÜN ÇOK İYİ BİR GÜN OLACAK"
 
+    
+    test_program(
+        key="helloworld",
+        plain_text="tell everyone that their message should not be too long otherwise the encryption algorithm has trouble with it",
+        lang="EN",
+        verbose=True
+    )
 
-    # test_program(key, plain_text, lang="EN")
-    # test_program(key, plain_text, lang="TR")
+    # test_program(
+    #     key="short",
+    #     plain_text="What a wonderful world we live in",
+    #     lang="EN",
+    #     verbose=True
+    # )
 
-    execute_all_tests()
+    # test_program(
+    #     key="short",
+    #     plain_text="tell everyone that their message should not be too long otherwise the encryption algorithm has trouble with it",
+    #     lang="EN",
+    #     verbose=True
+    # )
+
+
+    # execute_all_tests()
