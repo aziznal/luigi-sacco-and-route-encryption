@@ -1,4 +1,4 @@
 pyinstaller main.py ^
     --onefile ^
-    --add-data="data;data" ^
+    --add-data="assets;assets" ^
     -w

@@ -17,9 +17,9 @@ def center_window(window: Gui) -> None:
 
 def create_main_window():
 
-    widget_ids = "data/main-ids.json"
-    gui_file_path = "data/main-menu.ui"
-    kto_image_path = utils.get_path_in_bundle_dir("data/kto_logo.png")
+    widget_ids = "assets/main-ids.json"
+    gui_file_path = "assets/main-menu.ui"
+    kto_image_path = utils.get_path_in_bundle_dir("assets/kto_logo.png")
 
     gui = Gui(widget_ids, gui_file_path)
 
@@ -34,8 +34,8 @@ def create_main_window():
 
 
 def create_first_method_window(main_window: Gui):
-    widget_ids = "data/first-method-ids.json"
-    gui_file_path = "data/first-method.ui"
+    widget_ids = "assets/first-method-ids.json"
+    gui_file_path = "assets/first-method.ui"
 
     gui = Gui(widget_ids, gui_file_path)
 
@@ -56,8 +56,8 @@ def create_first_method_window(main_window: Gui):
 
 
 def create_second_method_window(main_window):
-    widget_ids = "data/second-method-ids.json"
-    gui_file_path = "data/second-method.ui"
+    widget_ids = "assets/second-method-ids.json"
+    gui_file_path = "assets/second-method.ui"
 
     gui = Gui(widget_ids, gui_file_path)
 
@@ -73,7 +73,7 @@ def create_second_method_window(main_window):
         main_window.activateWindow()
 
     # Adding images for Route Visualization
-    routes_image_path = utils.get_path_in_bundle_dir("data/routes.png")
+    routes_image_path = utils.get_path_in_bundle_dir("assets/routes.png")
     routes_image = QPixmap(routes_image_path)
 
     gui.get_widget("routesLabel").setPixmap(routes_image)
