@@ -1,14 +1,10 @@
 import string
 import traceback
 
+
 from typing import Iterable, Literal, Union, List, Tuple
 
-
-TURKISH_ALPHABET = {letter: letter_index for letter_index,
-                    letter in enumerate("ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ")}
-
-ENGLISH_ALPHABET = {letter: letter_index for letter_index,
-                    letter in enumerate(string.ascii_uppercase)}
+from .common import TURKISH_ALPHABET, ENGLISH_ALPHABET
 
 
 def custom_sort(iterable: Iterable, lang: Literal["EN", "TR"]) -> Iterable:

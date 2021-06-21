@@ -135,6 +135,10 @@ if __name__ == '__main__':
     #   add error window that can be called on user error and display a
     #   certain message
 
+    # TODO
+    #   disable table choice in the second method when the user chooses Decrypt
+    #   because it's not going to be needed.
+
     app = QApplication([])
 
     screen_geometry = QApplication.desktop().screenGeometry()
