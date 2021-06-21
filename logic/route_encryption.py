@@ -42,7 +42,56 @@ def create_empty_matrix(table_size, verbose=False):
 def populate_e4(message, empty_matrix):
     row_count, col_count = len(empty_matrix), len(empty_matrix[0])
 
-    return empty_matrix
+    # Copying given matrix
+    matrix = [ [element for element in row] for row in empty_matrix ]
+
+    message_iterator = iter(message)
+
+    # Applying algorithm
+    i_0, j_0 = row_count-1, col_count-1
+
+    incomplete_diag_rows = (row_count)
+
+    print(f"\nThere are {2*incomplete_diag_rows} incomplete diags in this matrix\n")
+    
+    # First fill "incomplete" diags
+
+    i = i_0
+    j = j_0
+    for index in range(incomplete_diag_rows - 1, 0, -1):
+
+        j = j_0
+        i = index
+
+        while i <= row_count-1:
+
+            print(i, j)
+
+            matrix[i][j] = next(message_iterator)
+
+            i += 1
+            j -= 1
+
+
+    
+    i_0, j_0 = row_count-1, col_count-1
+    # Main body of matrix
+    while i_0 > 0 or j_0 > 0:
+        print("iter")
+        i, j = 0, j_0
+        while i < row_count and j >= 0:
+            matrix[i][j] = next(message_iterator)
+            i += 1
+            j -= 1
+
+        if i_0 > 0: i_0 -= 1
+        if j_0 > 0: j_0 -= 1
+
+    
+    # Last incomplete diags
+    matrix[0][0] = next(message_iterator)
+
+    return matrix
 
 
 
