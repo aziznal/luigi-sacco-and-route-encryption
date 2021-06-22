@@ -1,9 +1,11 @@
+import PyQt5
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QPixmap
 
 from gui import Gui
 
 from logic.luigi_sacco import luigi_sacco_encrypt, luigi_sacco_decrypt
+from logic.route_encryption import route_encrypt, route_decrypt, get_potential_table_sizes
 
 import utils
 
@@ -116,6 +118,94 @@ def reset_luigi_sacco(window: Gui):
     window.get_widget('outputTextEdit').clear()
 
 
+
+def get_chosen_table_size(input_text, window: Gui):
+    
+    if len(input_text) <= 0:
+        return
+
+    sizes, _ = get_potential_table_sizes(len(input_text))
+
+    return sizes[ window.get_widget('arraySizeComboBox').currentIndex() ]
+
+
+def run_route_encryption(window: Gui):
+
+    get = lambda x: window.get_widget(x)
+
+    # Input Text
+    input_text = get('inputTextEdit').toPlainText()
+
+    if len(input_text) <= 0:
+        return
+
+    # Table Size
+    table_size = get_chosen_table_size(input_text, window)
+
+    # Encrypt vs. Decrypt
+    encrypt = get('encryptRadioButton').isChecked()
+    decrypt = get('decryptRadioButton').isChecked()
+
+    # Final output message which goes to output box
+    output = ""
+
+    if encrypt:
+        output = route_encrypt(input_text, table_size)
+
+    elif decrypt:
+        output = route_decrypt(input_text, table_size)
+
+
+    get('outputTextEdit').setPlainText(output)
+
+
+def reset_route_encryption(window: Gui):
+
+    get = lambda x: window.get_widget(x)
+
+    get('inputTextEdit').clear()
+    get('outputTextEdit').clear()
+    get('arraySizeComboBox').clear()
+    
+
+def populate_combobox(combobox, message):
+
+    combobox.clear()
+    if len(message) <= 0:
+        return
+
+    # Populate combobox with list of sizes
+    sizes, optimal_size = get_potential_table_sizes(len(message))
+    
+    for size in sizes:
+        if size == optimal_size or size == optimal_size[::-1]:
+            combobox.addItem(f"{size[0]} x {size[1]} (Recommended)")
+
+        else:
+            combobox.addItem(f"{size[0]} x {size[1]}")
+
+
+def add_route_encryption_hooks(window: Gui):
+    get = lambda x: window.get_widget(x)
+
+    # Set Encrypt as default option
+    get('encryptRadioButton').setChecked(True)
+
+    # Set drop-select to have no elements at the start
+    get('arraySizeComboBox').clear()
+
+
+    # As text gets typed, the table size combo-box gets filled with new values
+    get('inputTextEdit').textChanged.connect(
+        lambda: populate_combobox(get('arraySizeComboBox'), get('inputTextEdit').toPlainText())
+    )
+
+    # Run and Reset Button Listeners
+    window.add_event_listener("runButton", lambda: run_route_encryption(window))
+    window.add_event_listener("resetButton", lambda: reset_route_encryption(window))
+
+
+
 def add_luigi_sacco_hooks(window: Gui):
 
     # Check English and Encrypt by default
@@ -127,6 +217,7 @@ def add_luigi_sacco_hooks(window: Gui):
     window.add_event_listener('resetButton', lambda: reset_luigi_sacco(window))
 
     # TODO: add information section about luigi sacco and hook it up here
+
 
 
 if __name__ == '__main__':
@@ -170,7 +261,8 @@ if __name__ == '__main__':
         "secondMethodButton", lambda: show_method_window(second_method_window))
 
 
-    # Add hooks to luigi sacco
     add_luigi_sacco_hooks(first_method_window)
+
+    add_route_encryption_hooks(second_method_window)
 
     app.exec_()
