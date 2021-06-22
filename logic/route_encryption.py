@@ -163,6 +163,46 @@ def route_decrypt(input_text, table_size, verbose=True):
     return message
 
 
+
+def execute_tests():
+
+    messages = [
+        "Here is a normal message",
+        "Now here is a very long message that is quite cumbersome to write and may in fact cause the program the crash if it hadn't been written with this kind of message in mind",
+        "short",
+        "how's about we uses a few numbers and symbols?"
+    ]
+
+    total = 0
+    total_correct = 0
+
+    faulty_tests = []
+
+    for message in messages:
+
+        sizes, _ = get_potential_table_sizes(len(message))
+
+        for size in sizes:
+            
+            encrypted_message = route_encrypt(message, size, verbose=False)
+            decrypted_message = route_decrypt(encrypted_message, size, verbose=False)
+
+            total += 1
+
+            if message.replace(' ', '') == decrypted_message.replace(' ', ''):
+                total_correct += 1
+
+            else:
+                faulty_tests.append((message, size))
+
+
+    print(f"\nGot {total_correct} correct out of {total}")
+
+    if faulty_tests:
+        print("\n")
+        [print(row) for row in faulty_tests]
+
+
 if __name__ == '__main__':
 
     # TODO
@@ -171,20 +211,5 @@ if __name__ == '__main__':
 
     # TODO: Make sure to inform user to provide correct table size when decrypting a message
 
-    msg = "KALEMKILIÇTANÜSTÜNDÜR"
 
-    # msg = "ABCDEFGHIJKLMNOPQRSTUVWX"
-
-    sizes, optimal_size = get_potential_table_sizes(len(msg))
-
-
-
-    table_size = optimal_size
-    encrypted_message = route_encrypt(msg, table_size)
-    
-    print(f"\n\n\n\nEncrypted Message\n\n\t{encrypted_message}")
-
-
-
-    decrypted_message = route_decrypt(encrypted_message, table_size)
-    print(f"\n\n\n\nDecrypted Message\n\n\t{decrypted_message}")
+    execute_tests()
