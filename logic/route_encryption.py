@@ -111,7 +111,20 @@ def apply_reverse_b3(message, table_size):
 def apply_reverse_e4(matrix):
     row_count, col_count = len(matrix), len(matrix[0])
 
-    return "Unimplemented Yet"
+    message = ""
+
+    diags = get_matrix_diags(matrix)
+
+    for diag_head in diags:
+
+        i, j = diag_head
+
+        while i <= row_count-1 and j >= 0:
+            message += matrix[i][j]
+            i += 1
+            j -= 1
+
+    return message
     
 
 def route_encrypt(message, table_size, verbose=True):
