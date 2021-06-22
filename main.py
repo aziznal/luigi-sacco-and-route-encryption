@@ -135,9 +135,15 @@ if __name__ == '__main__':
     #   add error window that can be called on user error and display a
     #   certain message
 
+    
     # TODO
-    #   disable table choice in the second method when the user chooses Decrypt
-    #   because it's not going to be needed.
+    #   If message length is prime, either inform user or automatically add
+    #   extra letter to make its length non-prime
+
+
+    # TODO: 
+    #   Make sure to inform user to provide correct table size when
+    #   decrypting a message
 
     app = QApplication([])
 

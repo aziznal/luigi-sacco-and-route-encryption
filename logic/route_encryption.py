@@ -1,12 +1,23 @@
 
+from typing import List, Tuple
 
-def get_divisors(number):
+
+def get_divisors(number: int) -> List[int]:
+    """
+    Returns all positive integers that divide given number without remainder
+    (including the number itself)
+    """
     return [divisor for divisor in range(1, number+1) if number % divisor == 0]
 
 
-def get_potential_table_sizes(message_length, verbose=False):
+def get_potential_table_sizes(message_length: int, verbose: bool = False) -> Tuple[List[Tuple[int, int]], Tuple[int, int]]:
+    """
+    Returns a Tuple where the first element is a list of all potential sizes for
+    the given message length and the second element is the optimal size
+    """
 
-    print(f"Got message with size = {message_length}")
+    if verbose:
+        print(f"Got message with size = {message_length}")
 
     # Need to get all divisors of the given message length
     divisors = get_divisors(message_length)
@@ -29,17 +40,22 @@ def get_potential_table_sizes(message_length, verbose=False):
     return potential_table_sizes, optimal_size
 
 
-def create_empty_matrix(table_size, verbose=False):
+def create_empty_matrix(table_size: Tuple[int, int], verbose: bool = False) -> List[List[str]]:
     """
     Create matrix with the given size, filled with placeholder values
     """
     if verbose:
         print(f"\nCreating empty matrix with size {table_size[0]} x {table_size[1]}")
 
-    return [['_' for column in range(table_size[1])] for row in range(table_size[0])]
+    return [['_' for col in range(table_size[1])] for row in range(table_size[0])]
 
 
-def get_matrix_diags(matrix):
+def get_matrix_diags(matrix: List[List[str]]) -> List[Tuple[int, int]]:
+    """
+    Returns a list of all the diagonals for the given matrix appropriate to the
+    e4 route. The diagonals are returned in order and can be traversed to form
+    the message or decrypt an e4 matrix.
+    """
     row_count, col_count = len(matrix), len(matrix[0])
 
     diags = []
@@ -56,12 +72,17 @@ def get_matrix_diags(matrix):
     return diags
 
 
-def populate_e4(message, empty_matrix):
+def apply_e4(message: str, empty_matrix: List[List[str]]) -> List[List[str]]:
+    """
+    Distributes letters of given message across empty matrix according to E4
+    route
+    """
     row_count, col_count = len(empty_matrix), len(empty_matrix[0])
 
     # Copying given matrix
     matrix = [[element for element in row] for row in empty_matrix]
 
+    # Iterator is used to easily distribute chars of message across matrix
     message_iterator = iter(message)
 
     diags = get_matrix_diags(matrix)
@@ -78,7 +99,11 @@ def populate_e4(message, empty_matrix):
     return matrix
 
 
-def apply_b3(matrix):
+def apply_b3(matrix: List[List[str]]) -> str:
+    """
+    Creates encrypted message by following route in given matrix. Implemented
+    according to B3 route
+    """
     row_count, col_count = len(matrix), len(matrix[0])
 
     message = []
@@ -92,23 +117,30 @@ def apply_b3(matrix):
     return ''.join(message)
 
 
-def apply_reverse_b3(message, table_size):
+def apply_reverse_b3(message: str, table_size: Tuple[int, int]) -> List[List[str]]:
+    """
+    Applies a reverse version of B3 to distribute letters of given message
+    across a matrix with the given table size
+    """
     row_count, col_count = table_size
 
     # Create matrix with correct number of columns and rows
-    matrix = [ ['_' for _ in range(col_count)] for __ in range(row_count) ]
+    matrix = create_empty_matrix(table_size)
 
+    # Iterator is used to easily distribute message letters across matrix
     message_iterator = iter(message)
 
     for col in range(col_count):
         for row in list(range(row_count))[::-1]:
             matrix[row][col] = next(message_iterator)
 
-
     return matrix
 
 
-def apply_reverse_e4(matrix):
+def apply_reverse_e4(matrix: List[List[str]]) -> str:
+    """
+    Applies reverse E4 route algorithm to extract message from given matrix
+    """
     row_count, col_count = len(matrix), len(matrix[0])
 
     message = ""
@@ -125,33 +157,37 @@ def apply_reverse_e4(matrix):
             j -= 1
 
     return message
-    
 
-def route_encrypt(message, table_size, verbose=True):
+
+def route_encrypt(message: str, table_size: Tuple[int, int], verbose: bool = False) -> str:
+    """
+    Encrypts given message across a matrix with given table size according to E4 & B3 methods.
+    """
     if verbose:
         print(f"Creating empty matrix")
 
-    empty_matrix = create_empty_matrix(table_size, verbose=verbose)
+    empty_e4_matrix = create_empty_matrix(table_size, verbose=verbose)
 
     if verbose:
-        print("\n")
-        [print(f"{row}") for row in empty_matrix]
+        print("\n\nEmpty Matrix\n")
+        [print(f"{row}") for row in empty_e4_matrix]
 
-    # Now the matrix must be populated with the letters of the message
-
-    e4_matrix = populate_e4(message, empty_matrix)
+    populated_e4_matrix = apply_e4(message, empty_e4_matrix)
 
     if verbose:
         print("\n\nE4 Matrix\n")
-        [print(row) for row in e4_matrix]
+        [print(row) for row in populated_e4_matrix]
 
-    b3_message = apply_b3(e4_matrix)
+    b3_message = apply_b3(populated_e4_matrix)
 
     return b3_message
 
 
-def route_decrypt(input_text, table_size, verbose=True):
-    
+def route_decrypt(input_text: str, table_size: Tuple[int, int], verbose: bool = False) -> str:
+    """
+    Decrypts given message according to given table size. Follows reverse E4 & B3 routes.
+    """
+
     e4_matrix = apply_reverse_b3(input_text, table_size)
 
     if verbose:
@@ -163,8 +199,10 @@ def route_decrypt(input_text, table_size, verbose=True):
     return message
 
 
-
-def execute_tests():
+def execute_tests() -> None:
+    """
+    Simple Test Suite to test multiple messages across multiple different table sizes.
+    """
 
     messages = [
         "Here is a normal message",
@@ -183,9 +221,10 @@ def execute_tests():
         sizes, _ = get_potential_table_sizes(len(message))
 
         for size in sizes:
-            
+
             encrypted_message = route_encrypt(message, size, verbose=False)
-            decrypted_message = route_decrypt(encrypted_message, size, verbose=False)
+            decrypted_message = route_decrypt(
+                encrypted_message, size, verbose=False)
 
             total += 1
 
@@ -195,7 +234,6 @@ def execute_tests():
             else:
                 faulty_tests.append((message, size))
 
-
     print(f"\nGot {total_correct} correct out of {total}")
 
     if faulty_tests:
@@ -204,12 +242,5 @@ def execute_tests():
 
 
 if __name__ == '__main__':
-
-    # TODO
-    #   If message length is prime, either inform user or automatically add
-    #   extra letter to make its length non-prime
-
-    # TODO: Make sure to inform user to provide correct table size when decrypting a message
-
 
     execute_tests()
