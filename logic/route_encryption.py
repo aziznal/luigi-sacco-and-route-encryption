@@ -1,6 +1,4 @@
 
-from common import ENGLISH_ALPHABET, TURKISH_ALPHABET
-
 
 def get_divisors(number):
     return [divisor for divisor in range(1, number+1) if number % divisor == 0]
@@ -80,20 +78,41 @@ def populate_e4(message, empty_matrix):
     return matrix
 
 
-def apply_b3(matrix, with_spaces=False):
+def apply_b3(matrix):
     row_count, col_count = len(matrix), len(matrix[0])
 
     message = []
 
     # Iterate over all columns. The message starts from the end of the column to its top
     for col in range(col_count):
-
         # Iterate rows starting from bottom
         for row in list(range(row_count))[::-1]:
             message.append(matrix[row][col])
 
     return ''.join(message)
 
+
+def apply_reverse_b3(message, table_size):
+    row_count, col_count = table_size
+
+    # Create matrix with correct number of columns and rows
+    matrix = [ ['_' for _ in range(col_count)] for __ in range(row_count) ]
+
+    message_iterator = iter(message)
+
+    for col in range(col_count):
+        for row in list(range(row_count))[::-1]:
+            matrix[row][col] = next(message_iterator)
+
+
+    return matrix
+
+
+def apply_reverse_e4(matrix):
+    row_count, col_count = len(matrix), len(matrix[0])
+
+    return "Unimplemented Yet"
+    
 
 def route_encrypt(message, table_size, verbose=True):
     if verbose:
@@ -113,18 +132,31 @@ def route_encrypt(message, table_size, verbose=True):
         print("\n\nE4 Matrix\n")
         [print(row) for row in e4_matrix]
 
-    b3_message = apply_b3(e4_matrix, with_spaces=False)
+    b3_message = apply_b3(e4_matrix)
 
     return b3_message
 
 
 def route_decrypt(input_text, table_size, verbose=True):
-    pass
+    
+    e4_matrix = apply_reverse_b3(input_text, table_size)
+
+    if verbose:
+        print("\n\nInferred E4 Matrix:")
+        [print(row) for row in e4_matrix]
+
+    message = apply_reverse_e4(e4_matrix)
+
+    return message
 
 
 if __name__ == '__main__':
 
-    # TODO: If message length is prime, either inform user or automatically add extra letter to make its length non-prime
+    # TODO
+    #   If message length is prime, either inform user or automatically add
+    #   extra letter to make its length non-prime
+
+    # TODO: Make sure to inform user to provide correct table size when decrypting a message
 
     msg = "KALEMKILIÇTANÜSTÜNDÜR"
 
@@ -132,11 +164,14 @@ if __name__ == '__main__':
 
     sizes, optimal_size = get_potential_table_sizes(len(msg))
 
-    for size in sizes:
-        encrypted_message = route_encrypt(msg, size)
-        print(f"\n\n\t\t{encrypted_message}")
-        print("\n"*7)
 
-    # route_encrypt()
 
-    # route_decrypt()
+    table_size = optimal_size
+    encrypted_message = route_encrypt(msg, table_size)
+    
+    print(f"\n\n\n\nEncrypted Message\n\n\t{encrypted_message}")
+
+
+
+    decrypted_message = route_decrypt(encrypted_message, table_size)
+    print(f"\n\n\n\nDecrypted Message\n\n\t{decrypted_message}")
