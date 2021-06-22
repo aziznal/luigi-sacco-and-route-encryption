@@ -14,7 +14,8 @@ def get_potential_table_sizes(message_length, verbose=False):
     divisors = get_divisors(message_length)
     reverse_divisors = divisors[::-1]
 
-    potential_table_sizes = [(i, j) for i, j in zip(divisors, reverse_divisors)]
+    potential_table_sizes = [(i, j)
+                             for i, j in zip(divisors, reverse_divisors)]
 
     if verbose:
         print("\nPotential Sizes for Table:")
@@ -22,7 +23,7 @@ def get_potential_table_sizes(message_length, verbose=False):
             print(f"{i} x {j}")
 
     # Optimal size is when the difference between row counts and column counts is minimized
-    optimal_size = min(potential_table_sizes, key= lambda x: abs(x[0]-x[1]))
+    optimal_size = min(potential_table_sizes, key=lambda x: abs(x[0]-x[1]))
 
     if verbose:
         print(f"\nOptimal Size = {optimal_size}")
@@ -30,18 +31,19 @@ def get_potential_table_sizes(message_length, verbose=False):
     return potential_table_sizes, optimal_size
 
 
-
 def create_empty_matrix(table_size, verbose=False):
+    """
+    Create matrix with the given size, filled with placeholder values
+    """
     if verbose:
         print(f"\nCreating empty matrix with size {table_size[0]} x {table_size[1]}")
 
-    return [ [ '_' for column in range(table_size[1]) ] for row in range(table_size[0]) ]
-
+    return [['_' for column in range(table_size[1])] for row in range(table_size[0])]
 
 
 def get_matrix_diags(matrix):
     row_count, col_count = len(matrix), len(matrix[0])
-    
+
     diags = []
     # Every element in the last column is the start of a diagonal
     # List is reversed to keep order of diagonals
@@ -55,18 +57,18 @@ def get_matrix_diags(matrix):
 
     return diags
 
+
 def populate_e4(message, empty_matrix):
     row_count, col_count = len(empty_matrix), len(empty_matrix[0])
 
     # Copying given matrix
-    matrix = [ [element for element in row] for row in empty_matrix ]
+    matrix = [[element for element in row] for row in empty_matrix]
 
     message_iterator = iter(message)
 
     diags = get_matrix_diags(matrix)
 
     for diag_head in diags:
-        print(diag_head)
 
         i, j = diag_head
 
@@ -78,51 +80,42 @@ def populate_e4(message, empty_matrix):
     return matrix
 
 
-
-def populate_b3(matrix):
+def apply_b3(matrix, with_spaces=False):
     row_count, col_count = len(matrix), len(matrix[0])
-    return matrix
+
+    message = []
+
+    # Iterate over all columns. The message starts from the end of the column to its top
+    for col in range(col_count):
+
+        # Iterate rows starting from bottom
+        for row in list(range(row_count))[::-1]:
+            message.append(matrix[row][col])
+
+    return ''.join(message)
 
 
-
-def create_matrix(message, table_size, verbose=True):
-    """
-    Create matrix with the given size, filled with placeholder values
-    """
-
+def route_encrypt(message, table_size, verbose=True):
     if verbose:
         print(f"Creating empty matrix")
-        
+
     empty_matrix = create_empty_matrix(table_size, verbose=verbose)
 
     if verbose:
         print("\n")
         [print(f"{row}") for row in empty_matrix]
 
-
     # Now the matrix must be populated with the letters of the message
 
     e4_matrix = populate_e4(message, empty_matrix)
 
-    print("\n\nE4 Matrix\n")
-    [print(row) for row in e4_matrix]
+    if verbose:
+        print("\n\nE4 Matrix\n")
+        [print(row) for row in e4_matrix]
 
-
-    b3_matrix = populate_b3(e4_matrix)
-
-    print("\n\nB3 Matrix\n")
-    [print(row) for row in b3_matrix]
-
-    b3_message = ' '.join( ''.join(row) for row in e4_matrix)
-
-    print("\n\nB3 Message\n")
-    print(b3_message)
+    b3_message = apply_b3(e4_matrix, with_spaces=False)
 
     return b3_message
-
-
-def route_encrypt(input_text, table_size, verbose=True):
-    pass
 
 
 def route_decrypt(input_text, table_size, verbose=True):
@@ -135,9 +128,14 @@ if __name__ == '__main__':
 
     msg = "KALEMKILIÇTANÜSTÜNDÜR"
 
+    # msg = "ABCDEFGHIJKLMNOPQRSTUVWX"
+
     sizes, optimal_size = get_potential_table_sizes(len(msg))
 
-    matrix = create_matrix(msg, optimal_size)
+    for size in sizes:
+        encrypted_message = route_encrypt(msg, size)
+        print(f"\n\n\t\t{encrypted_message}")
+        print("\n"*7)
 
     # route_encrypt()
 
