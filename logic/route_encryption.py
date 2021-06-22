@@ -39,6 +39,22 @@ def create_empty_matrix(table_size, verbose=False):
 
 
 
+def get_matrix_diags(matrix):
+    row_count, col_count = len(matrix), len(matrix[0])
+    
+    diags = []
+    # Every element in the last column is the start of a diagonal
+    # List is reversed to keep order of diagonals
+    for i in list(range(row_count))[::-1]:
+        diags.append((i, col_count-1))
+
+    # Every element in the first row is also the start of a diagonal
+    for j in list(range(col_count))[::-1]:
+        if (0, j) not in diags:
+            diags.append((0, j))
+
+    return diags
+
 def populate_e4(message, empty_matrix):
     row_count, col_count = len(empty_matrix), len(empty_matrix[0])
 
@@ -47,55 +63,23 @@ def populate_e4(message, empty_matrix):
 
     message_iterator = iter(message)
 
-    # Applying algorithm
-    i_0, j_0 = row_count-1, col_count-1
+    diags = get_matrix_diags(matrix)
 
-    incomplete_diag_rows = (row_count)
+    for diag_head in diags:
+        print(diag_head)
 
-    print(f"\nThere are {2*incomplete_diag_rows} incomplete diags in this matrix\n")
-    
-    # First fill "incomplete" diags
+        i, j = diag_head
 
-    i = i_0
-    j = j_0
-    for index in range(incomplete_diag_rows - 1, 0, -1):
-
-        j = j_0
-        i = index
-
-        while i <= row_count-1:
-
-            print(i, j)
-
-            matrix[i][j] = next(message_iterator)
-
-            i += 1
-            j -= 1
-
-
-    
-    i_0, j_0 = row_count-1, col_count-1
-    # Main body of matrix
-    while i_0 > 0 or j_0 > 0:
-        print("iter")
-        i, j = 0, j_0
-        while i < row_count and j >= 0:
+        while i <= row_count-1 and j >= 0:
             matrix[i][j] = next(message_iterator)
             i += 1
             j -= 1
-
-        if i_0 > 0: i_0 -= 1
-        if j_0 > 0: j_0 -= 1
-
-    
-    # Last incomplete diags
-    matrix[0][0] = next(message_iterator)
 
     return matrix
 
 
 
-def populate_b3(message, matrix):
+def populate_b3(matrix):
     row_count, col_count = len(matrix), len(matrix[0])
     return matrix
 
@@ -124,13 +108,7 @@ def create_matrix(message, table_size, verbose=True):
     [print(row) for row in e4_matrix]
 
 
-    e4_message = ''.join( ''.join(row) for row in e4_matrix)
-
-    print("\n\nE4 Message\n")
-    print(e4_message)
-
-
-    b3_matrix = populate_b3(e4_message, empty_matrix)
+    b3_matrix = populate_b3(e4_matrix)
 
     print("\n\nB3 Matrix\n")
     [print(row) for row in b3_matrix]
