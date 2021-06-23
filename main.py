@@ -339,6 +339,15 @@ if __name__ == '__main__':
     #   Make sure to inform user to provide correct table size when
     #   decrypting a message
 
+    # TODO
+    #   Add Warnings about input type and allowed chars
+
+    # TODO:
+    #   Add 50 character limit to route encryption
+
+    # TODO:
+    #   Add section where message is displayed in E4 Matrix form
+
     app = QApplication([])
 
     screen_geometry = QApplication.desktop().screenGeometry()

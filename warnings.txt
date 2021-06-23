@@ -1,5 +1,19 @@
 Luigi Socco:
-
+    
+    - Enter your message in any form you want.
+    
+    - Do not use symbols or digits in the key or plain text.
+    
     - You may include repeating characters in your key.
-    - Enter your message in any form you want. Output will always be capital letters.
-    - Do not use any symbols (such as punctuation) or numerical digits in your message.
+    
+    - Output will always be capital letters with no spaces.
+
+
+
+Route Encryption:
+
+    - Enter up to 50 characters in any form you want.
+    
+    - Use any combination of letters, symbols, or digits.
+    
+    - Output will always be capital Letters with no spaces.
