@@ -249,12 +249,14 @@ def reset_route_encryption(window: Gui) -> None:
     get('arraySizeComboBox').clear()
 
 
-def populate_combobox(combobox: QComboBox, message: str) -> None:
+def populate_combobox(combobox: QComboBox, get_message: Callable[[], str]) -> None:
     """
     Populates given combobox with potential tables sizes for the given message.
     """
 
     combobox.clear()
+
+    message = get_message()
 
     if len(message) <= 0:
         return
@@ -287,16 +289,18 @@ def add_route_encryption_hooks(window: Gui) -> None:
 
     # As text gets typed, the table size combo-box gets filled with new values
     get('inputTextEdit').textChanged.connect(
-        lambda: populate_combobox(combobox, input_text)
+        lambda: populate_combobox(combobox, lambda: get('inputTextEdit').toPlainText())
     )
 
     # Run and Reset Button Listeners
     window.add_event_listener(
-        "runButton", lambda: run_route_encryption(window)
+        "runButton",
+        lambda: run_route_encryption(window)
     )
 
     window.add_event_listener(
-        "resetButton", lambda: reset_route_encryption(window)
+        "resetButton",
+        lambda: reset_route_encryption(window)
     )
 
 
