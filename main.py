@@ -186,7 +186,7 @@ def get_chosen_table_size(input_text: str, get: Callable[[str], QWidget]) -> Tup
     """
 
     if len(input_text) <= 0:
-        raise (0, 0)
+        return (0, 0)
 
     sizes, _ = get_potential_table_sizes(len(input_text))
 
