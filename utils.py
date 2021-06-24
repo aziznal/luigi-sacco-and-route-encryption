@@ -29,3 +29,12 @@ def load_json(file_path: str) -> Union[Dict, Dict[str, List[str]]]:
 
     with open(file_path) as _file:
         return json.load(_file)
+
+
+def is_prime(number: int) -> bool:
+
+    for num in range(2, number):
+        if number % num == 0:
+            return False
+
+    return True
