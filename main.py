@@ -7,7 +7,7 @@ from PyQt5.QtGui import QPixmap
 from gui import Gui
 
 from logic.luigi_sacco import luigi_sacco_encrypt, luigi_sacco_decrypt, confirm_text_in_correct_lang, format_key_and_input_text
-from logic.route_encryption import route_encrypt, route_decrypt, get_potential_table_sizes
+from logic.route_encryption import create_empty_matrix, route_encrypt, route_decrypt, get_potential_table_sizes, apply_e4, apply_reverse_b3
 
 import utils
 
@@ -318,14 +318,20 @@ def run_route_encryption(window: Gui) -> None:
 
     # Final output message which goes to output box
     output = ""
+    matrix_output = []
 
     if action == ENCRYPT:
         output = route_encrypt(input_text, table_size)
+        matrix_output = apply_e4(input_text, create_empty_matrix(table_size))
 
     elif action == DECRYPT:
         output = route_decrypt(input_text, table_size)
+        matrix_output = apply_reverse_b3(input_text, table_size)
 
+    # Convert output matrix into a string
+    formatted_matrix_output = "\n".join(', '.join(row) for row in matrix_output)
     get('outputTextEdit').setPlainText(output)
+    get('matrixOutputTextEdit').setPlainText(formatted_matrix_output)
 
 
 def reset_route_encryption(window: Gui) -> None:
@@ -337,6 +343,7 @@ def reset_route_encryption(window: Gui) -> None:
 
     get('inputTextEdit').clear()
     get('outputTextEdit').clear()
+    get('matrixOutputTextEdit').clear()
     get('arraySizeComboBox').clear()
 
 
@@ -419,8 +426,7 @@ def add_luigi_sacco_hooks(window: Gui) -> None:
 
 if __name__ == '__main__':
 
-    # TODO:
-    #   Add section where message is displayed in E4 Matrix form
+    # TODO: Add Correct Route Image for B3
 
     app = QApplication([])
 

@@ -11,6 +11,7 @@
 
     "QTextEdit": [
         "inputTextEdit",
+        "matrixOutputTextEdit",
         "outputTextEdit"
     ],
 
