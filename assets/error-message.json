@@ -1,0 +1,11 @@
+{
+    "QPushButton": [
+        "okayButton"
+    ],
+
+    "QLabel": [
+        "errorNameLabel",
+        "errorMessageLabel",
+        "errorSolutionLabel"
+    ]
+}

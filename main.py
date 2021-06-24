@@ -6,7 +6,7 @@ from PyQt5.QtGui import QPixmap
 
 from gui import Gui
 
-from logic.luigi_sacco import luigi_sacco_encrypt, luigi_sacco_decrypt
+from logic.luigi_sacco import luigi_sacco_encrypt, luigi_sacco_decrypt, confirm_text_in_correct_lang, format_key_and_input_text
 from logic.route_encryption import route_encrypt, route_decrypt, get_potential_table_sizes
 
 import utils
@@ -47,6 +47,44 @@ def create_main_window() -> Gui:
 
 
 
+def create_error_message_window() -> Gui:
+    """
+    Creates a small error message whose contents can be tuned to inform the user
+    of an error
+    """
+
+    widget_ids = "assets/error-message.json"
+    gui_file_path = "assets/error-message.ui"
+
+    gui = Gui(widget_ids, gui_file_path)
+
+    # Hidden by default
+    gui.hide()
+
+    center_window(gui)
+
+    # Set the okay button to hide the window when clicked
+    gui.add_event_listener('okayButton', lambda: gui.hide())
+
+    return gui
+
+
+
+def display_error_message( error_message_window: Gui, title: str, content: str, solution: str) -> None:
+    """
+    Shows error dialog.
+    """
+    error_message_window.get_widget('errorNameLabel').setText(title)
+    error_message_window.get_widget('errorMessageLabel').setText(content)
+    error_message_window.get_widget('errorSolutionLabel').setText(solution)
+
+    center_window(error_message_window)
+
+    error_message_window.show()
+
+    error_message_window.activateWindow()
+
+
 def goto_window(source: Gui, destination: Gui) -> None:
     """
     Hides source gui and centers then shows the destination gui
@@ -61,31 +99,30 @@ def goto_window(source: Gui, destination: Gui) -> None:
 
 
 
-def create_luigi_sacco_window(main_window: Gui) -> Gui:
+def create_luigi_sacco_window(main_window: Gui, show_error: Callable[[str, str, str], None]) -> Gui:
     """
     Creates a submenu where user can use luigi sacco encryption / decrypytion
     """
     widget_ids = "assets/first-method-ids.json"
     gui_file_path = "assets/first-method.ui"
 
-    gui = Gui(widget_ids, gui_file_path)
+    gui = Gui(widget_ids, gui_file_path, show_error)
 
     gui.hide()
-
 
     gui.add_event_listener("backButton", lambda: goto_window(gui, main_window))
 
     return gui
 
 
-def create_route_encryption_window(main_window: Gui) -> Gui:
+def create_route_encryption_window(main_window: Gui, show_error: Callable[[str, str, str], None]) -> Gui:
     """
     Creates window where user can use route encryption / decryption according to E4 & B3 Routes
     """
     widget_ids = "assets/second-method-ids.json"
     gui_file_path = "assets/second-method.ui"
 
-    gui = Gui(widget_ids, gui_file_path)
+    gui = Gui(widget_ids, gui_file_path, show_error)
 
     # Make this window hidden by default
     gui.hide()
@@ -155,11 +192,43 @@ def run_luigi_sacco(window: Gui) -> None:
         key, plain_text = get_luigi_sacco_input(get)
 
     except ValueError:
+        window.show_error(
+            title="Empty Key or Input Text",
+            content="Cannot run program without both Key and Input Text present.",
+            solution="Please fill in both of these fields and try again"
+        )
+
         return
 
     action = get_selected_action(get)
 
     output = ""
+
+
+    formatted_key, formatted_plain_text = format_key_and_input_text(key, plain_text)
+    
+    # Confirm Language has been correctly chosen
+    try:
+        confirm_text_in_correct_lang(formatted_key, language)
+    except ValueError:
+        window.show_error(
+            title="Key has invalid characters",
+            content="Your key includes characters that do not belong in your chosen language",
+            solution="Remove any characters than don't belong to your chosen language and try again"
+        )
+
+        return
+
+    try:
+        confirm_text_in_correct_lang(formatted_plain_text, language)
+    except ValueError:
+        window.show_error(
+            title="Plain Text has invalid characters",
+            content="Your Plain Text includes characters that do not belong in your chosen language",
+            solution="Remove any characters than don't belong to your chosen language and try again"
+        )
+
+        return
 
     if action == ENCRYPT:
         output = luigi_sacco_encrypt(key, plain_text, language)
@@ -220,7 +289,29 @@ def run_route_encryption(window: Gui) -> None:
     input_text, table_size = get_route_encryption_input(get)
 
     if len(input_text) == 0:
+        window.show_error(
+            title="Cannot Encrypt / Decrypt Empty Message",
+            content="You attempted to start the program with no input text",
+            solution="Enter at least one character in input field and try again"
+        )
         return
+
+    elif len(input_text) > 50:
+        window.show_error(
+            title="Your input is too long",
+            content="Maximum allowed is 50 characters",
+            solution=f"You have entered {len(input_text)} characters. Please make sure your input is less than 50 characters."
+        )
+
+        return
+
+    if utils.is_prime(len(input_text)):
+        window.show_error(
+            title="Warning! Text Length is Prime",
+            content=f"Your input text has a prime length of {len(input_text)} characters",
+            solution="To get better performance using this encryption method, add another letter to your message."
+        )
+
 
     # Encrypt vs. Decrypt
     action = get_selected_action(get)
@@ -270,6 +361,7 @@ def populate_combobox(combobox: QComboBox, get_message: Callable[[], str]) -> No
 
         else:
             combobox.addItem(f"{size[0]} x {size[1]}")
+
 
 
 def add_route_encryption_hooks(window: Gui) -> None:
@@ -327,24 +419,6 @@ def add_luigi_sacco_hooks(window: Gui) -> None:
 
 if __name__ == '__main__':
 
-    # TODO
-    #   add error window that can be called on user error and display a
-    #   certain message
-
-    # TODO
-    #   If message length is prime, either inform user or automatically add
-    #   extra letter to make its length non-prime
-
-    # TODO:
-    #   Make sure to inform user to provide correct table size when
-    #   decrypting a message
-
-    # TODO
-    #   Add Warnings about input type and allowed chars
-
-    # TODO:
-    #   Add 50 character limit to route encryption
-
     # TODO:
     #   Add section where message is displayed in E4 Matrix form
 
@@ -355,8 +429,12 @@ if __name__ == '__main__':
     SCREEN_HEIGHT = screen_geometry.height()
 
     main_window = create_main_window()
-    luigi_sacco_window = create_luigi_sacco_window(main_window)
-    route_encryption_window = create_route_encryption_window(main_window)
+    error_dialog = create_error_message_window()
+
+    show_error = lambda title, content, solution: display_error_message(error_dialog, title, content, solution)
+
+    luigi_sacco_window = create_luigi_sacco_window(main_window, show_error)
+    route_encryption_window = create_route_encryption_window(main_window, show_error)
 
     main_window.add_event_listener(
         "firstMethodButton",

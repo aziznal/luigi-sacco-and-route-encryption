@@ -9,7 +9,7 @@ import utils
 
 class Gui(QMainWindow):
 
-    def __init__(self, widget_type_id_dict: Dict[str, List[str]], gui_file_path: str, *args, **kwargs) -> None:
+    def __init__(self, widget_type_id_dict: Dict[str, List[str]], gui_file_path: str, show_error: Callable = None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         self.gui_file_path: str = utils.get_path_in_bundle_dir(gui_file_path)
@@ -19,6 +19,8 @@ class Gui(QMainWindow):
 
         # Stores all loaded widgets for easy access
         self._widget_objects = self._load_widget_objects()
+
+        self.show_error = show_error
 
         self.show()
 
@@ -33,7 +35,8 @@ class Gui(QMainWindow):
 
                 # I use 'exec' here to avoid having to specify object type and
                 # instead only define it in ids.json
-                exec("widget_objects[object_id] = self.findChild(" + object_type + ", object_id)")
+                exec(
+                    "widget_objects[object_id] = self.findChild(" + object_type + ", object_id)")
 
         return widget_objects
 
@@ -48,5 +51,5 @@ class Gui(QMainWindow):
             traceback.print_exc()
 
     def add_event_listener(self, widget_id: str, on_event: Callable) -> None:
-        
+
         self._widget_objects[widget_id].clicked.connect(on_event)
