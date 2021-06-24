@@ -207,7 +207,7 @@ QPushButton:hover {
       </font>
      </property>
      <property name="text">
-      <string>- Enter your message in any way you want. You may include any symbols / digits.</string>
+      <string>- Enter your message in any way you want. You may include spaces, symbols, and digits.</string>
      </property>
     </widget>
     <widget class="QLabel" name="secondWarningLabel">
@@ -226,7 +226,7 @@ QPushButton:hover {
       </font>
      </property>
      <property name="text">
-      <string>- You may input any combinations of letters, symbols, and digits from any language.</string>
+      <string>- You may input any combination of letters, symbols, and digits from any language.</string>
      </property>
     </widget>
     <widget class="QLabel" name="secondWarningLabel_2">
