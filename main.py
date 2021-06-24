@@ -115,6 +115,23 @@ def create_luigi_sacco_window(main_window: Gui, show_error: Callable[[str, str, 
     return gui
 
 
+def create_luigi_sacco_info_window(luigi_sacco_window: Gui) -> Gui:
+    """
+    Creates the info window for the Luigi Sacco encryption method
+    """
+    
+    widget_ids = "assets/luigi-sacco-info-ids.json"
+    gui_file_path = "assets/luigi-sacco-info.ui"
+
+    gui = Gui(widget_ids, gui_file_path)
+
+    gui.hide()
+
+    gui.add_event_listener("backButton", lambda: goto_window(gui, luigi_sacco_window))
+
+    return gui
+
+
 def create_route_encryption_window(main_window: Gui, show_error: Callable[[str, str, str], None]) -> Gui:
     """
     Creates window where user can use route encryption / decryption according to E4 & B3 Routes
@@ -403,13 +420,13 @@ def add_route_encryption_hooks(window: Gui) -> None:
     )
 
 
-def add_luigi_sacco_hooks(window: Gui) -> None:
+def add_luigi_sacco_hooks(luigi_sacco_window: Gui, info_window: Gui) -> None:
     """
     Hooks Luigi Sacco Gui with its Logic
     """
 
     # Shortcuts for ops in this function
-    get = lambda x: window.get_widget(x)
+    get = lambda x: luigi_sacco_window.get_widget(x)
 
     # Check English by default
     get('englishRadioButton').setChecked(True)
@@ -418,10 +435,10 @@ def add_luigi_sacco_hooks(window: Gui) -> None:
     get('encryptRadioButton').setChecked(True)
 
     # Set listeners for RUN and RESET buttons
-    window.add_event_listener('runButton', lambda: run_luigi_sacco(window))
-    window.add_event_listener('resetButton', lambda: reset_luigi_sacco(window))
+    luigi_sacco_window.add_event_listener('runButton', lambda: run_luigi_sacco(luigi_sacco_window))
+    luigi_sacco_window.add_event_listener('resetButton', lambda: reset_luigi_sacco(luigi_sacco_window))
 
-    # TODO: add information section about luigi sacco and hook it up here
+    luigi_sacco_window.add_event_listener('informationButton', lambda: goto_window(luigi_sacco_window, info_window))
 
 
 if __name__ == '__main__':
@@ -438,6 +455,8 @@ if __name__ == '__main__':
     show_error = lambda title, content, solution: display_error_message(error_dialog, title, content, solution)
 
     luigi_sacco_window = create_luigi_sacco_window(main_window, show_error)
+    luigi_sacco_info_window = create_luigi_sacco_info_window(luigi_sacco_window)
+
     route_encryption_window = create_route_encryption_window(main_window, show_error)
 
     main_window.add_event_listener(
@@ -450,7 +469,7 @@ if __name__ == '__main__':
         lambda: goto_window(main_window, route_encryption_window)
     )
 
-    add_luigi_sacco_hooks(luigi_sacco_window)
+    add_luigi_sacco_hooks(luigi_sacco_window, luigi_sacco_info_window)
 
     add_route_encryption_hooks(route_encryption_window)
 

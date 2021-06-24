@@ -21,6 +21,8 @@
 
     "QPushButton": [
 
+        "informationButton",
+
         "runButton",
         "resetButton",
 
