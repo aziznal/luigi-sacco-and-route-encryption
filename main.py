@@ -426,8 +426,6 @@ def add_luigi_sacco_hooks(window: Gui) -> None:
 
 if __name__ == '__main__':
 
-    # TODO: Add Correct Route Image for B3
-
     app = QApplication([])
 
     screen_geometry = QApplication.desktop().screenGeometry()

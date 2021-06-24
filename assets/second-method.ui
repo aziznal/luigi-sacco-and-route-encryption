@@ -653,9 +653,9 @@ p, li { white-space: pre-wrap; }
     <widget class="QLabel" name="routesLabel">
      <property name="geometry">
       <rect>
-       <x>40</x>
+       <x>20</x>
        <y>30</y>
-       <width>131</width>
+       <width>171</width>
        <height>81</height>
       </rect>
      </property>
