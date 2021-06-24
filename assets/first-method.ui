@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>570</width>
+    <height>750</height>
+   </rect>
+  </property>
   <property name="sizePolicy">
    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
     <horstretch>0</horstretch>
@@ -11,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>570</width>
-    <height>650</height>
+    <height>750</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>570</width>
-    <height>650</height>
+    <height>750</height>
    </size>
   </property>
   <property name="palette">
@@ -141,7 +149,7 @@ QPushButton:hover {
     <property name="geometry">
      <rect>
       <x>390</x>
-      <y>570</y>
+      <y>670</y>
       <width>131</width>
       <height>31</height>
      </rect>
@@ -157,14 +165,14 @@ QPushButton:hover {
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>10</y>
+      <y>20</y>
       <width>521</width>
-      <height>71</height>
+      <height>161</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>11</pointsize>
+      <pointsize>9</pointsize>
      </font>
     </property>
     <property name="styleSheet">
@@ -187,38 +195,78 @@ QPushButton:hover {
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>20</y>
-       <width>491</width>
+       <y>30</y>
+       <width>501</width>
        <height>16</height>
       </rect>
      </property>
      <property name="font">
       <font>
-       <pointsize>10</pointsize>
+       <pointsize>9</pointsize>
+       <weight>50</weight>
+       <bold>false</bold>
        <underline>false</underline>
       </font>
      </property>
      <property name="text">
-      <string>Make sure to provide valid input</string>
+      <string>- Use small or capital letters in the key and plain text. You may include or ignore spaces.</string>
      </property>
     </widget>
     <widget class="QLabel" name="secondWarningLabel">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>40</y>
+       <y>60</y>
        <width>491</width>
        <height>16</height>
       </rect>
      </property>
      <property name="font">
       <font>
-       <pointsize>10</pointsize>
+       <pointsize>9</pointsize>
        <underline>false</underline>
       </font>
      </property>
      <property name="text">
-      <string>Git Gud</string>
+      <string>- Do NOT use symbols ( such as ! # ? ' &quot; ) or digits ( 0 - 9 ) in the key or plain text.</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="secondWarningLabel_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>90</y>
+       <width>491</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>9</pointsize>
+       <underline>false</underline>
+      </font>
+     </property>
+     <property name="text">
+      <string>- You may use the same letter multiple times in your key.</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="secondWarningLabel_3">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>120</y>
+       <width>491</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>9</pointsize>
+       <underline>false</underline>
+      </font>
+     </property>
+     <property name="text">
+      <string>- Output will always be in CAPITAL letters with no spaces.</string>
      </property>
     </widget>
    </widget>
@@ -226,7 +274,7 @@ QPushButton:hover {
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>90</y>
+      <y>190</y>
       <width>311</width>
       <height>541</height>
      </rect>
@@ -362,7 +410,7 @@ p, li { white-space: pre-wrap; }
     <property name="geometry">
      <rect>
       <x>360</x>
-      <y>150</y>
+      <y>250</y>
       <width>191</width>
       <height>391</height>
      </rect>
@@ -579,7 +627,7 @@ p, li { white-space: pre-wrap; }
     <property name="geometry">
      <rect>
       <x>360</x>
-      <y>100</y>
+      <y>200</y>
       <width>191</width>
       <height>31</height>
      </rect>
