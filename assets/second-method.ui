@@ -195,7 +195,7 @@ QPushButton:hover {
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>30</y>
+       <y>20</y>
        <width>531</width>
        <height>16</height>
       </rect>
@@ -207,14 +207,14 @@ QPushButton:hover {
       </font>
      </property>
      <property name="text">
-      <string>- Enter your message in any way you want. You may include spaces, symbols, and digits.</string>
+      <string>Enter your message in any way you want. You may include spaces, symbols, and digits.</string>
      </property>
     </widget>
     <widget class="QLabel" name="secondWarningLabel">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>60</y>
+       <y>50</y>
        <width>531</width>
        <height>16</height>
       </rect>
@@ -226,14 +226,14 @@ QPushButton:hover {
       </font>
      </property>
      <property name="text">
-      <string>- You may input any combination of letters, symbols, and digits from any language.</string>
+      <string>You may input any combination of letters, symbols, and digits from any language.</string>
      </property>
     </widget>
     <widget class="QLabel" name="secondWarningLabel_2">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>90</y>
+       <y>80</y>
        <width>531</width>
        <height>16</height>
       </rect>
@@ -245,14 +245,36 @@ QPushButton:hover {
       </font>
      </property>
      <property name="text">
-      <string>- You may input up to 50 characters at max.</string>
+      <string>You may input up to 50 characters at max.</string>
      </property>
     </widget>
     <widget class="QLabel" name="secondWarningLabel_3">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>120</y>
+       <y>100</y>
+       <width>531</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+       <underline>false</underline>
+      </font>
+     </property>
+     <property name="text">
+      <string>When Decrypting a message, make sure to choose the same table size as when it was     encrypted.</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="secondWarningLabel_4">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>150</y>
        <width>531</width>
        <height>16</height>
       </rect>
@@ -264,7 +286,7 @@ QPushButton:hover {
       </font>
      </property>
      <property name="text">
-      <string>- Output will in the same format as the input. (including spaces &amp; small/capital letter case)</string>
+      <string>Output will in the same format as the input. (including spaces &amp; small/capital letter case)</string>
      </property>
     </widget>
    </widget>

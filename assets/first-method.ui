@@ -209,7 +209,7 @@ QPushButton:hover {
       </font>
      </property>
      <property name="text">
-      <string>- Use small or capital letters in the key and plain text. You may include or ignore spaces.</string>
+      <string>Use small or capital letters in the key and plain text. You may include or ignore spaces.</string>
      </property>
     </widget>
     <widget class="QLabel" name="secondWarningLabel">
@@ -228,7 +228,7 @@ QPushButton:hover {
       </font>
      </property>
      <property name="text">
-      <string>- Do NOT use symbols ( such as ! # ? ' &quot; ) or digits ( 0 - 9 ) in the key or plain text.</string>
+      <string>Do NOT use symbols ( such as ! # ? ' &quot; ) or digits ( 0 - 9 ) in the key or plain text.</string>
      </property>
     </widget>
     <widget class="QLabel" name="secondWarningLabel_2">
@@ -247,7 +247,7 @@ QPushButton:hover {
       </font>
      </property>
      <property name="text">
-      <string>- You may use the same letter multiple times in your key.</string>
+      <string>You may use the same letter multiple times in your key.</string>
      </property>
     </widget>
     <widget class="QLabel" name="secondWarningLabel_3">
@@ -266,7 +266,7 @@ QPushButton:hover {
       </font>
      </property>
      <property name="text">
-      <string>- Output will always be in CAPITAL letters with no spaces.</string>
+      <string>Output will always be in CAPITAL letters with no spaces.</string>
      </property>
     </widget>
    </widget>
